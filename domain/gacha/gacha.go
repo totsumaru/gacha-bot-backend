@@ -5,6 +5,7 @@ import (
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed"
+	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
@@ -13,7 +14,7 @@ type Gacha struct {
 	id     domain.UUID
 	panel  embed.Embed
 	open   embed.Embed
-	result embed.Embed
+	result []result.Result
 }
 
 // ガチャを生成します
@@ -21,7 +22,7 @@ func NewGacha(
 	id domain.UUID,
 	panel embed.Embed,
 	open embed.Embed,
-	result embed.Embed,
+	result []result.Result,
 ) (Gacha, error) {
 	g := Gacha{
 		id:     id,
@@ -53,22 +54,32 @@ func (g Gacha) Open() embed.Embed {
 }
 
 // 結果を返します
-func (g Gacha) Result() embed.Embed {
+func (g Gacha) Result() []result.Result {
 	return g.result
 }
 
 // ガチャを検証します
 func (g Gacha) validate() error {
+	// 確率の合計が100%か確認します
+	sum := 0
+	for _, r := range g.result {
+		sum += r.Probability().Int()
+	}
+
+	if sum != 100 {
+		return errors.NewError("確率の合計が100%ではありません", nil)
+	}
+
 	return nil
 }
 
 // ガチャをJSONに変換します
 func (g Gacha) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ID     domain.UUID `json:"id"`
-		Panel  embed.Embed `json:"panel"`
-		Open   embed.Embed `json:"open"`
-		Result embed.Embed `json:"result"`
+		ID     domain.UUID     `json:"id"`
+		Panel  embed.Embed     `json:"panel"`
+		Open   embed.Embed     `json:"open"`
+		Result []result.Result `json:"result"`
 	}{
 		ID:     g.id,
 		Panel:  g.panel,
@@ -82,10 +93,10 @@ func (g Gacha) MarshalJSON() ([]byte, error) {
 // ガチャをJSONから復元します
 func (g *Gacha) UnmarshalJSON(b []byte) error {
 	data := struct {
-		ID     domain.UUID `json:"id"`
-		Panel  embed.Embed `json:"panel"`
-		Open   embed.Embed `json:"open"`
-		Result embed.Embed `json:"result"`
+		ID     domain.UUID     `json:"id"`
+		Panel  embed.Embed     `json:"panel"`
+		Open   embed.Embed     `json:"open"`
+		Result []result.Result `json:"result"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {

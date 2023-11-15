@@ -34,6 +34,26 @@ func NewServer(
 	return s, nil
 }
 
+// 支払い者のIDを更新します
+func (s *Server) UpdateSubscriberID(subscriberID domain.DiscordID) error {
+	s.subscriberID = subscriberID
+	if err := s.validate(); err != nil {
+		return errors.NewError("サーバーの更新に失敗しました", err)
+	}
+
+	return nil
+}
+
+// Stripeを更新します
+func (s *Server) UpdateStripe(stripe stripe.Stripe) error {
+	s.stripe = stripe
+	if err := s.validate(); err != nil {
+		return errors.NewError("サーバーの更新に失敗しました", err)
+	}
+
+	return nil
+}
+
 // IDを返します
 func (s Server) ID() domain.DiscordID {
 	return s.id
