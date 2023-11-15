@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/gacha-bot-backend/api/checkout"
-	"github.com/totsumaru/gacha-bot-backend/api/checkout/portal"
-	"github.com/totsumaru/gacha-bot-backend/api/checkout/webhook"
+	"github.com/totsumaru/gacha-bot-backend/api/portal"
+	"github.com/totsumaru/gacha-bot-backend/api/webhook"
 	"gorm.io/gorm"
 )
 

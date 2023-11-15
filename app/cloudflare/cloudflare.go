@@ -2,6 +2,7 @@ package cloudflare
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -36,7 +37,11 @@ func Upload(c *gin.Context, image *multipart.FileHeader) (string, error) {
 		return "", errors.NewError("UUIDの生成に失敗しました", err)
 	}
 
-	publicURL := os.Getenv("CLOUDFLARE_URL") + newUUID.String()
+	publicURL := fmt.Sprintf(
+		"%s/%s",
+		os.Getenv("CLOUDFLARE_URL"),
+		newUUID.String(),
+	)
 
 	var f = func(service, region string, options ...interface{}) (aws.Endpoint, error) {
 		return aws.Endpoint{URL: os.Getenv("CLOUDFLARE_S3_API_URL")}, nil

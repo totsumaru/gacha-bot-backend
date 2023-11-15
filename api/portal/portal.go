@@ -62,14 +62,17 @@ func CreateCustomerPortal(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("本人ではありません", err)
 			}
 
+			// カスタマーポータルから戻るボタンで、遷移するURLを作成
+			returnURL := fmt.Sprintf(
+				"%s/dashboard/%s/config",
+				os.Getenv("FRONTEND_URL"),
+				serverID,
+			)
+
 			// customerIdからカスタマーポータルURLを作成
 			params := &stripe.BillingPortalSessionParams{
-				Customer: stripe.String(apiRes.Stripe().CustomerID().Value()),
-				ReturnURL: stripe.String(fmt.Sprintf(
-					"%sdashboard/%s/config",
-					os.Getenv("FRONTEND_URL"),
-					serverID,
-				)),
+				Customer:  stripe.String(apiRes.Stripe().CustomerID().Value()),
+				ReturnURL: stripe.String(returnURL),
 			}
 
 			s, err := session.New(params)

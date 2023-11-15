@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v74/webhook"
 	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -75,6 +76,12 @@ func Webhook(e *gin.Engine, db *gorm.DB) {
 					"guildID":        guildID,
 					"discordID":      discordID,
 				}
+
+				errors.SendErrMsg(
+					discord.Session,
+					fmt.Errorf("サブスクリプションの支払いに失敗したユーザーがいます。: %v", resObj),
+					guildID,
+				)
 
 				return errors.NewError(fmt.Sprintf(
 					"サブスクリプションの支払いに失敗したユーザーがいます。: %v",
