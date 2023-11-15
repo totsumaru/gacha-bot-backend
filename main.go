@@ -11,9 +11,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/totsumaru/gacha-bot-backend/expose"
-	"github.com/totsumaru/gacha-bot-backend/expose/api"
-	"github.com/totsumaru/gacha-bot-backend/expose/bot/handler"
+	"github.com/totsumaru/gacha-bot-backend/api"
+	"github.com/totsumaru/gacha-bot-backend/bot"
+	"github.com/totsumaru/gacha-bot-backend/bot/handler"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -71,7 +71,7 @@ func main() {
 		panic(errors.NewError("DBに接続できません", err))
 	}
 
-	expose.DB = db
+	bot.DB = db
 
 	// テーブルが存在していない場合のみテーブルを作成します
 	// 存在している場合はスキーマを同期します

@@ -1,4 +1,4 @@
-package expose
+package bot
 
 import "gorm.io/gorm"
 

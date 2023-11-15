@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/totsumaru/gacha-bot-backend/expose/bot/handler/interaction_craete"
-	"github.com/totsumaru/gacha-bot-backend/expose/bot/handler/message_create"
+	"github.com/totsumaru/gacha-bot-backend/bot/handler/interaction_craete"
+	"github.com/totsumaru/gacha-bot-backend/bot/handler/message_create"
 )
 
 // メッセージが作成された時のハンドラです
