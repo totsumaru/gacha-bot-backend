@@ -10,14 +10,14 @@ import (
 
 // サーバーです
 type Server struct {
-	id           domain.UUID
+	id           domain.DiscordID
 	subscriberID domain.DiscordID // 支払い者のユーザーID
 	stripe       stripe.Stripe
 }
 
 // サーバーを作成します
 func NewServer(
-	id domain.UUID,
+	id domain.DiscordID,
 	subscriberID domain.DiscordID,
 	stripe stripe.Stripe,
 ) (Server, error) {
@@ -35,7 +35,7 @@ func NewServer(
 }
 
 // IDを返します
-func (s Server) ID() domain.UUID {
+func (s Server) ID() domain.DiscordID {
 	return s.id
 }
 
@@ -57,7 +57,7 @@ func (s Server) validate() error {
 // サーバーをJSONに変換します
 func (s Server) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ID           domain.UUID      `json:"id"`
+		ID           domain.DiscordID `json:"id"`
 		SubscriberID domain.DiscordID `json:"subscriber_id"`
 		Stripe       stripe.Stripe    `json:"stripe"`
 	}{
@@ -72,7 +72,7 @@ func (s Server) MarshalJSON() ([]byte, error) {
 // JSONからサーバーに変換します
 func (s *Server) UnmarshalJSON(b []byte) error {
 	data := struct {
-		ID           domain.UUID      `json:"id"`
+		ID           domain.DiscordID `json:"id"`
 		SubscriberID domain.DiscordID `json:"subscriber_id"`
 		Stripe       stripe.Stripe    `json:"stripe"`
 	}{}

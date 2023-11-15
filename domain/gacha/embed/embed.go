@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
-	"github.com/totsumaru/gacha-bot-backend/domain/gatcha/embed/button"
+	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed/button"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 

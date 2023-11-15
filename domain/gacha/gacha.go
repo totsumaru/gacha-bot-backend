@@ -1,10 +1,10 @@
-package gatcha
+package gacha
 
 import (
 	"encoding/json"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
-	"github.com/totsumaru/gacha-bot-backend/domain/gatcha/embed"
+	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
