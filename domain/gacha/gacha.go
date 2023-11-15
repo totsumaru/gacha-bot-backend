@@ -19,6 +19,31 @@ type Gacha struct {
 
 // ガチャを生成します
 func NewGacha(
+	panel embed.Embed,
+	open embed.Embed,
+	result []result.Result,
+) (Gacha, error) {
+	id, err := domain.NewUUID()
+	if err != nil {
+		return Gacha{}, errors.NewError("IDの生成に失敗しました", err)
+	}
+
+	g := Gacha{
+		id:     id,
+		panel:  panel,
+		open:   open,
+		result: result,
+	}
+
+	if err = g.validate(); err != nil {
+		return Gacha{}, errors.NewError("ガチャの生成に失敗しました", err)
+	}
+
+	return g, nil
+}
+
+// ガチャを復元します
+func RestoreGacha(
 	id domain.UUID,
 	panel embed.Embed,
 	open embed.Embed,
