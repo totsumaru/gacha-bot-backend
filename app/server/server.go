@@ -131,3 +131,23 @@ func DeleteSubscription(tx *gorm.DB, id string) error {
 
 	return nil
 }
+
+// IDでサーバーを取得します
+func FindByID(tx *gorm.DB, id string) (server.Server, error) {
+	serverID, err := domain.NewDiscordID(id)
+	if err != nil {
+		return server.Server{}, errors.NewError("IDを作成できません", err)
+	}
+
+	gw, err := gatewayServer.NewGateway(tx)
+	if err != nil {
+		return server.Server{}, errors.NewError("ゲートウェイの生成に失敗しました", err)
+	}
+
+	s, err := gw.FindByID(serverID)
+	if err != nil {
+		return server.Server{}, errors.NewError("IDでサーバーを取得できません", err)
+	}
+
+	return s, nil
+}
