@@ -6,9 +6,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/v74"
-	"github.com/stripe/stripe-go/v74/checkout/session"
-	"github.com/totsumaru/gacha-bot-backend/lib/auth"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
@@ -24,32 +23,33 @@ func Checkout(e *gin.Engine) {
 		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 		priceId := os.Getenv("STRIPE_PRICE_ID")
 
-		authHeader := c.GetHeader(auth.HeaderAuthorization)
+		//authHeader := c.GetHeader(auth.HeaderAuthorization)
 		serverID := c.Query("server_id")
 
 		var userID string
+		userID = "960104306151948328" // TODO: 検証用のため削除する
 
-		// verify
-		{
-			if serverID == "" || authHeader == "" {
-				errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
-					"serverID: %s, authHeader: %s", serverID, authHeader,
-				))
-				return
-			}
-
-			headerRes, err := auth.GetAuthHeader(authHeader)
-			if err != nil {
-				errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
-				return
-			}
-			userID = headerRes.DiscordID
-
-			if err = auth.IsAdmin(serverID, headerRes.DiscordID); err != nil {
-				errors.HandleError(c, 401, "必要な権限を持っていません", err)
-				return
-			}
-		}
+		//// verify
+		//{
+		//	if serverID == "" || authHeader == "" {
+		//		errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
+		//			"serverID: %s, authHeader: %s", serverID, authHeader,
+		//		))
+		//		return
+		//	}
+		//
+		//	headerRes, err := auth.GetAuthHeader(authHeader)
+		//	if err != nil {
+		//		errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
+		//		return
+		//	}
+		//	userID = headerRes.DiscordID
+		//
+		//	if err = auth.IsAdmin(serverID, headerRes.DiscordID); err != nil {
+		//		errors.HandleError(c, 401, "必要な権限を持っていません", err)
+		//		return
+		//	}
+		//}
 
 		ds := discord.Session
 		guild, err := ds.Guild(serverID)

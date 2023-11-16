@@ -15,6 +15,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/bot/handler"
 	"github.com/totsumaru/gacha-bot-backend/gateway"
+	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -47,6 +48,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	discord.Session = session
 
 	//イベントハンドラを追加
 	handler.Handler(session)

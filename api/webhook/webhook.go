@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/v74/webhook"
+	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/totsumaru/gacha-bot-backend/app/server"
 	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -35,7 +35,6 @@ func Webhook(e *gin.Engine, db *gorm.DB) {
 
 		err = db.Transaction(func(tx *gorm.DB) error {
 			// イベントオブジェクトのdocument
-			// https://billing.stripe.com/p/login/test_00geXT3KO9jS2CAaEE
 			switch event.Type {
 			case "checkout.session.completed":
 				// Checkout で顧客が「支払う」または「登録」ボタンをクリックすると送信され、新しい購入が通知されます。

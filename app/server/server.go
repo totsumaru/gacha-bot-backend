@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/server"
 	"github.com/totsumaru/gacha-bot-backend/domain/server/stripe"
@@ -45,7 +47,11 @@ func StartSubscription(
 	tx *gorm.DB,
 	id, subscriberID, customerID, subscriptionID string,
 ) error {
-	// idでサーバーを取得
+	fmt.Println("id: ", id)
+	fmt.Println("subscriberID: ", subscriberID)
+	fmt.Println("customerID: ", customerID)
+	fmt.Println("subscriptionID: ", subscriptionID)
+
 	serverID, err := domain.NewDiscordID(id)
 	if err != nil {
 		return errors.NewError("IDを作成できません", err)
@@ -56,14 +62,20 @@ func StartSubscription(
 		return errors.NewError("ゲートウェイの生成に失敗しました", err)
 	}
 
+	// idでサーバーを取得
 	sv, err := gw.FindByID(serverID)
 	if err != nil {
 		return errors.NewError("IDでサーバーを取得できません", err)
 	}
 
-	subscriver, err := domain.NewDiscordID(subscriberID)
+	subscriber, err := domain.NewDiscordID(subscriberID)
 	if err != nil {
 		return errors.NewError("支払い者のIDを作成できません", err)
+	}
+
+	// サブスクライバーIDを更新
+	if err = sv.UpdateSubscriberID(subscriber); err != nil {
+		return errors.NewError("サーバーの更新に失敗しました", err)
 	}
 
 	cusID, err := stripe.NewCustomerID(customerID)
@@ -81,10 +93,7 @@ func StartSubscription(
 		return errors.NewError("サーバー構造体を復元できません", err)
 	}
 
-	if err = sv.UpdateSubscriberID(subscriver); err != nil {
-		return errors.NewError("サーバーの更新に失敗しました", err)
-	}
-
+	// stripeを更新
 	if err = sv.UpdateStripe(st); err != nil {
 		return errors.NewError("サーバーの更新に失敗しました", err)
 	}

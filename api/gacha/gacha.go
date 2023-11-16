@@ -4,6 +4,10 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/app/gacha"
 )
 
+// ========================
+// ガチャのAPIの共通処理です
+// ========================
+
 // ガチャのリクエストです
 type GachaReq struct {
 	ServerID string      `json:"server_id"`
