@@ -10,9 +10,10 @@ import (
 
 // ガチャのリクエストです
 type GachaReq struct {
-	Panel  EmbedReq
-	Open   EmbedReq
-	Result []ResultReq
+	ServerID string
+	Panel    EmbedReq
+	Open     EmbedReq
+	Result   []ResultReq
 }
 
 // 結果のリクエストです
@@ -124,8 +125,6 @@ func createEmbed(req EmbedReq) (embed.Embed, error) {
 		}
 
 		b = append(b, bb)
-
-		return embed.Embed{}, errors.NewError("ボタンの生成に失敗しました", err)
 	}
 
 	e, err := embed.NewEmbed(t, d, c, i, tu, b)

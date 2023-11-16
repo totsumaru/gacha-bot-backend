@@ -6,33 +6,34 @@ import (
 
 // ガチャのリクエストです
 type GachaReq struct {
-	Panel  EmbedReq
-	Open   EmbedReq
-	Result []ResultReq
+	ServerID string      `json:"server_id"`
+	Panel    EmbedReq    `json:"panel"`
+	Open     EmbedReq    `json:"open"`
+	Result   []ResultReq `json:"result"`
 }
 
 // 結果のリクエストです
 type ResultReq struct {
-	Embed       EmbedReq
-	Point       int
-	Probability int
+	Embed       EmbedReq `json:"embed"`
+	Point       int      `json:"point"`
+	Probability int      `json:"probability"`
 }
 
 // ガチャの埋め込みのリクエストです
 type EmbedReq struct {
-	Title        string
-	Description  string
-	Color        int
-	ImageURL     string
-	ThumbnailURL string
-	Button       []ButtonReq
+	Title        string      `json:"title"`
+	Description  string      `json:"description"`
+	Color        int         `json:"color"`
+	ImageURL     string      `json:"image_url"`
+	ThumbnailURL string      `json:"thumbnail_url"`
+	Button       []ButtonReq `json:"button"`
 }
 
 // ボタンのリクエストです
 type ButtonReq struct {
-	Kind  string
-	Label string
-	Style string
+	Kind  string `json:"kind"`
+	Label string `json:"label"`
+	Style string `json:"style"`
 }
 
 // APIのリクエストをAppのリクエストに変換します
@@ -46,9 +47,10 @@ func ConvertToAppGachaReq(apiGachaReq GachaReq) gacha.GachaReq {
 	}
 
 	return gacha.GachaReq{
-		Panel:  panel,
-		Open:   open,
-		Result: results,
+		ServerID: apiGachaReq.ServerID,
+		Panel:    panel,
+		Open:     open,
+		Result:   results,
 	}
 }
 

@@ -11,14 +11,16 @@ import (
 
 // ガチャのドメインモデルです
 type Gacha struct {
-	id     domain.UUID
-	panel  embed.Embed
-	open   embed.Embed
-	result []result.Result
+	id       domain.UUID
+	serverID domain.DiscordID
+	panel    embed.Embed
+	open     embed.Embed
+	result   []result.Result
 }
 
 // ガチャを生成します
 func NewGacha(
+	serverID domain.DiscordID,
 	panel embed.Embed,
 	open embed.Embed,
 	result []result.Result,
@@ -29,10 +31,11 @@ func NewGacha(
 	}
 
 	g := Gacha{
-		id:     id,
-		panel:  panel,
-		open:   open,
-		result: result,
+		id:       id,
+		serverID: serverID,
+		panel:    panel,
+		open:     open,
+		result:   result,
 	}
 
 	if err = g.validate(); err != nil {
@@ -45,15 +48,17 @@ func NewGacha(
 // ガチャを復元します
 func RestoreGacha(
 	id domain.UUID,
+	serverID domain.DiscordID,
 	panel embed.Embed,
 	open embed.Embed,
 	result []result.Result,
 ) (Gacha, error) {
 	g := Gacha{
-		id:     id,
-		panel:  panel,
-		open:   open,
-		result: result,
+		id:       id,
+		serverID: serverID,
+		panel:    panel,
+		open:     open,
+		result:   result,
 	}
 
 	if err := g.validate(); err != nil {
@@ -66,6 +71,11 @@ func RestoreGacha(
 // IDを返します
 func (g Gacha) ID() domain.UUID {
 	return g.id
+}
+
+// サーバーIDを返します
+func (g Gacha) ServerID() domain.DiscordID {
+	return g.serverID
 }
 
 // パネルを返します
@@ -101,15 +111,17 @@ func (g Gacha) validate() error {
 // ガチャをJSONに変換します
 func (g Gacha) MarshalJSON() ([]byte, error) {
 	data := struct {
-		ID     domain.UUID     `json:"id"`
-		Panel  embed.Embed     `json:"panel"`
-		Open   embed.Embed     `json:"open"`
-		Result []result.Result `json:"result"`
+		ID       domain.UUID      `json:"id"`
+		ServerID domain.DiscordID `json:"server_id"`
+		Panel    embed.Embed      `json:"panel"`
+		Open     embed.Embed      `json:"open"`
+		Result   []result.Result  `json:"result"`
 	}{
-		ID:     g.id,
-		Panel:  g.panel,
-		Open:   g.open,
-		Result: g.result,
+		ID:       g.id,
+		ServerID: g.serverID,
+		Panel:    g.panel,
+		Open:     g.open,
+		Result:   g.result,
 	}
 
 	return json.Marshal(data)
@@ -118,10 +130,11 @@ func (g Gacha) MarshalJSON() ([]byte, error) {
 // ガチャをJSONから復元します
 func (g *Gacha) UnmarshalJSON(b []byte) error {
 	data := struct {
-		ID     domain.UUID     `json:"id"`
-		Panel  embed.Embed     `json:"panel"`
-		Open   embed.Embed     `json:"open"`
-		Result []result.Result `json:"result"`
+		ID       domain.UUID      `json:"id"`
+		ServerID domain.DiscordID `json:"server_id"`
+		Panel    embed.Embed      `json:"panel"`
+		Open     embed.Embed      `json:"open"`
+		Result   []result.Result  `json:"result"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -129,6 +142,7 @@ func (g *Gacha) UnmarshalJSON(b []byte) error {
 	}
 
 	g.id = data.ID
+	g.serverID = data.ServerID
 	g.panel = data.Panel
 	g.open = data.Open
 	g.result = data.Result

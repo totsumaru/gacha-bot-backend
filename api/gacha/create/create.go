@@ -1,48 +1,49 @@
 package create
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	apiGacha "github.com/totsumaru/gacha-bot-backend/api/gacha"
 	"github.com/totsumaru/gacha-bot-backend/app/gacha"
-	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
 
+type Req struct {
+	apiGacha.GachaReq
+}
+
 // ガチャを作成します
 func CreateGacha(e *gin.Engine, db *gorm.DB) {
 	e.POST("/gacha/create", func(c *gin.Context) {
-		serverID := c.Query("server_id")
-		authHeader := c.GetHeader(auth.HeaderAuthorization)
+		//authHeader := c.GetHeader(auth.HeaderAuthorization)
+		//
+		//var userID string
 
-		var userID string
+		//// verify
+		//{
+		//	if serverID == "" || authHeader == "" {
+		//		errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
+		//			"serverID: %s, authHeader: %s", serverID, authHeader,
+		//		))
+		//		return
+		//	}
+		//
+		//	headerRes, err := auth.GetAuthHeader(authHeader)
+		//	if err != nil {
+		//		errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
+		//		return
+		//	}
+		//	userID = headerRes.DiscordID
+		//
+		//	if err = auth.IsAdmin(serverID, userID); err != nil {
+		//		errors.HandleError(c, 401, "管理者ではありません", err)
+		//		return
+		//	}
+		//}
 
-		// verify
-		{
-			if serverID == "" || authHeader == "" {
-				errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
-					"serverID: %s, authHeader: %s", serverID, authHeader,
-				))
-				return
-			}
-
-			headerRes, err := auth.GetAuthHeader(authHeader)
-			if err != nil {
-				errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
-				return
-			}
-			userID = headerRes.DiscordID
-
-			if err = auth.IsAdmin(serverID, userID); err != nil {
-				errors.HandleError(c, 401, "管理者ではありません", err)
-				return
-			}
-		}
-
-		var gachaReq apiGacha.GachaReq
+		gachaReq := apiGacha.GachaReq{}
 		// リクエストボディのJSONをGachaReqにバインド
 		if err := c.ShouldBindJSON(&gachaReq); err != nil {
 			errors.HandleError(c, http.StatusBadRequest, "リクエストの解析に失敗しました", err)

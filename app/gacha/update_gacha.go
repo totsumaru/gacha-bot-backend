@@ -15,6 +15,11 @@ func UpdateGacha(tx *gorm.DB, id string, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("DiscordIDの生成に失敗しました", err)
 	}
 
+	sID, err := domain.NewDiscordID(req.ServerID)
+	if err != nil {
+		return gacha.Gacha{}, errors.NewError("サーバーIDの生成に失敗しました", err)
+	}
+
 	panel, err := createEmbed(req.Panel)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("panelの生成に失敗しました", err)
@@ -30,7 +35,7 @@ func UpdateGacha(tx *gorm.DB, id string, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("resultの生成に失敗しました", err)
 	}
 
-	g, err := gacha.RestoreGacha(i, panel, open, result)
+	g, err := gacha.RestoreGacha(i, sID, panel, open, result)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("ガチャの生成に失敗しました", err)
 	}

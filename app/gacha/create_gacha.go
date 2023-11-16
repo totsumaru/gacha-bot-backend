@@ -1,6 +1,7 @@
 package gacha
 
 import (
+	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	gatewayGacha "github.com/totsumaru/gacha-bot-backend/gateway/gacha"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -9,6 +10,11 @@ import (
 
 // ガチャを新規作成します
 func CreateGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
+	sID, err := domain.NewDiscordID(req.ServerID)
+	if err != nil {
+		return gacha.Gacha{}, errors.NewError("サーバーIDの生成に失敗しました", err)
+	}
+
 	panel, err := createEmbed(req.Panel)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("panelの生成に失敗しました", err)
@@ -24,7 +30,7 @@ func CreateGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("resultの生成に失敗しました", err)
 	}
 
-	g, err := gacha.NewGacha(panel, open, result)
+	g, err := gacha.NewGacha(sID, panel, open, result)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("ガチャの生成に失敗しました", err)
 	}
