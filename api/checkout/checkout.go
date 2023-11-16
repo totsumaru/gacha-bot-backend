@@ -22,7 +22,7 @@ func Checkout(e *gin.Engine) {
 	// チェックアウトを作成します
 	e.POST("/api/checkout", func(c *gin.Context) {
 		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-		priceId := os.Getenv("STRIPE_PRO_PRICE_ID")
+		priceId := os.Getenv("STRIPE_PRICE_ID")
 
 		authHeader := c.GetHeader(auth.HeaderAuthorization)
 		serverID := c.Query("server_id")

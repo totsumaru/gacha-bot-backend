@@ -14,6 +14,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/api"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/bot/handler"
+	"github.com/totsumaru/gacha-bot-backend/gateway"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -75,9 +76,9 @@ func main() {
 
 	// テーブルが存在していない場合のみテーブルを作成します
 	// 存在している場合はスキーマを同期します
-	//if err = db.AutoMigrate(&applicationDB.Application{}); err != nil {
-	//	panic(errors.NewError("テーブルのスキーマが一致しません", err))
-	//}
+	if err = db.AutoMigrate(&gateway.Server{}, &gateway.Gacha{}); err != nil {
+		panic(errors.NewError("テーブルのスキーマが一致しません", err))
+	}
 
 	// Ginの設定
 	{

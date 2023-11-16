@@ -11,7 +11,7 @@ import (
 
 // サーバーを作成します
 //
-// botが導入された時にコールされます。
+// 最初に1度だけ使用します。
 func CreateServer(tx *gorm.DB, serverID string) error {
 	id, err := domain.NewDiscordID(serverID)
 	if err != nil {
