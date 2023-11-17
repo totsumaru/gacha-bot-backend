@@ -8,8 +8,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// ガチャを新規作成します
-func CreateGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
+// ガチャをUpsertします
+func UpsertGacha(tx *gorm.DB, id string, req GachaReq) (gacha.Gacha, error) {
+	i, err := domain.RestoreUUID(id)
+	if err != nil {
+		return gacha.Gacha{}, errors.NewError("DiscordIDの生成に失敗しました", err)
+	}
+
 	sID, err := domain.NewDiscordID(req.ServerID)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("サーバーIDの生成に失敗しました", err)
@@ -30,7 +35,7 @@ func CreateGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("resultの生成に失敗しました", err)
 	}
 
-	g, err := gacha.NewGacha(sID, panel, open, result)
+	g, err := gacha.RestoreGacha(i, sID, panel, open, result)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("ガチャの生成に失敗しました", err)
 	}
@@ -40,8 +45,8 @@ func CreateGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("Gatewayの生成に失敗しました", err)
 	}
 
-	if err = gw.Create(g); err != nil {
-		return gacha.Gacha{}, errors.NewError("ガチャの保存に失敗しました", err)
+	if err = gw.Upsert(g); err != nil {
+		return gacha.Gacha{}, errors.NewError("ガチャの更新に失敗しました", err)
 	}
 
 	return g, nil

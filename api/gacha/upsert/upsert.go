@@ -1,4 +1,4 @@
-package update
+package upsert
 
 import (
 	"net/http"
@@ -10,9 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// ガチャを更新します
-func UpdateGacha(e *gin.Engine, db *gorm.DB) {
-	e.POST("/gacha/update", func(c *gin.Context) {
+// ガチャを作成/更新します
+func UpsertGacha(e *gin.Engine, db *gorm.DB) {
+	e.POST("/gacha/upsert", func(c *gin.Context) {
 		gachaID := c.Query("gacha_id")
 		//authHeader := c.GetHeader(auth.HeaderAuthorization)
 		//
@@ -49,7 +49,7 @@ func UpdateGacha(e *gin.Engine, db *gorm.DB) {
 
 		err := db.Transaction(func(tx *gorm.DB) error {
 			appReq := apiGacha.ConvertToAppGachaReq(gachaReq)
-			_, err := gacha.UpdateGacha(tx, gachaID, appReq)
+			_, err := gacha.UpsertGacha(tx, gachaID, appReq)
 			if err != nil {
 				return errors.NewError("ガチャの更新に失敗しました", err)
 			}

@@ -8,6 +8,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/gateway"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Gateway struct {
@@ -49,25 +50,22 @@ func (g Gateway) Create(gacha gacha.Gacha) error {
 	return nil
 }
 
-// 更新します
-func (g Gateway) Update(gacha gacha.Gacha) error {
+// Upsertは、指定されたIDに対応するレコードを更新するか、
+// 存在しない場合は新しいレコードを作成します。
+func (g Gateway) Upsert(gacha gacha.Gacha) error {
 	dbGacha, err := castToDBStruct(gacha)
 	if err != nil {
 		return errors.NewError("ドメインモデルをDBの構造体に変換できません", err)
 	}
 
-	// IDに基づいてレコードを更新
-	result := g.tx.Model(&gateway.Gacha{}).Where(
-		"id = ?",
-		dbGacha.ID,
-	).Updates(&dbGacha)
-	if result.Error != nil {
-		return errors.NewError("更新できません", result.Error)
-	}
+	// Upsert処理を実行
+	result := g.tx.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}}, // IDをキーとして使用
+		UpdateAll: true,                          // 衝突した場合、すべての列を更新
+	}).Create(&dbGacha)
 
-	// 主キー制約違反を検出（指定されたIDのレコードが存在しない場合）
-	if result.RowsAffected == 0 {
-		return errors.NewError("レコードが存在しません")
+	if result.Error != nil {
+		return errors.NewError("レコードの更新/作成に失敗しました", result.Error)
 	}
 
 	return nil
