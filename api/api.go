@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/gacha-bot-backend/api/checkout"
 	"github.com/totsumaru/gacha-bot-backend/api/gacha/upsert"
+	"github.com/totsumaru/gacha-bot-backend/api/images"
 	"github.com/totsumaru/gacha-bot-backend/api/portal"
 	"github.com/totsumaru/gacha-bot-backend/api/webhook"
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	portal.CreateCustomerPortal(e, db)
 	webhook.Webhook(e, db)
 	upsert.UpsertGacha(e, db)
+	images.UploadImages(e)
 }
 
 // ルートです

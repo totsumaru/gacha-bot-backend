@@ -12,7 +12,7 @@ import (
 
 // ガチャを作成/更新します
 func UpsertGacha(e *gin.Engine, db *gorm.DB) {
-	e.POST("/gacha/upsert", func(c *gin.Context) {
+	e.POST("/api/gacha/upsert", func(c *gin.Context) {
 		gachaID := c.Query("gacha_id")
 		//authHeader := c.GetHeader(auth.HeaderAuthorization)
 		//

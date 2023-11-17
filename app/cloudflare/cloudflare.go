@@ -20,7 +20,7 @@ import (
 //
 // 公開URLを返します。
 func Upload(c *gin.Context, image *multipart.FileHeader) (string, error) {
-	var bucketName = "profio"
+	var bucketName = "gacha-bot"
 	var accessKeyId = os.Getenv("CLOUDFLARE_S3_ACCESS_KEY")
 	var accessKeySecret = os.Getenv("CLOUDFLARE_S3_SECRET_ACCESS_KEY")
 
@@ -50,7 +50,7 @@ func Upload(c *gin.Context, image *multipart.FileHeader) (string, error) {
 	r2Resolver := aws.EndpointResolverWithOptionsFunc(f)
 
 	cfg, err := config.LoadDefaultConfig(
-		c,
+		context.Background(),
 		config.WithEndpointResolverWithOptions(r2Resolver),
 		config.WithCredentialsProvider(
 			credentials.NewStaticCredentialsProvider(
