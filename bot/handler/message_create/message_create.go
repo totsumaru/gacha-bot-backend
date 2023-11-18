@@ -16,7 +16,7 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err := bot.DB.Transaction(func(tx *gorm.DB) error {
 		switch m.Content {
 		case "!gacha-setup":
-			dashboardURL := os.Getenv("FRONTEND_URL") + "/dashboard" + m.GuildID
+			dashboardURL := os.Getenv("FRONTEND_URL") + "/server/" + m.GuildID
 			// すでに登録されている場合は、返信を返すのみ
 			_, err := server.FindByID(tx, m.GuildID)
 			if err == nil {
