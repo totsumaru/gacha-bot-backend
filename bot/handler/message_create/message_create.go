@@ -1,6 +1,9 @@
 package message_create
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/bot"
@@ -26,7 +29,15 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return errors.NewError("サーバーの作成に失敗しました", err)
 			}
 
-			if _, err = s.ChannelMessageSend(m.ChannelID, "セットアップが完了しました"); err != nil {
+			txt := `
+セットアップが完了しました。
+以下のURLから設定を進めてください。
+%s
+`
+			if _, err = s.ChannelMessageSend(
+				m.ChannelID,
+				fmt.Sprintf(txt, os.Getenv("FRONTEND_URL")+"/server/"+m.GuildID),
+			); err != nil {
 				return errors.NewError("メッセージの送信に失敗しました", err)
 			}
 		}
