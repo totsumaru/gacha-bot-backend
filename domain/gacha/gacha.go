@@ -102,7 +102,7 @@ func (g Gacha) validate() error {
 	}
 
 	if sum != 100 {
-		return errors.NewError("確率の合計が100%ではありません", nil)
+		return errors.NewError("確率の合計が100％ではありません")
 	}
 
 	return nil

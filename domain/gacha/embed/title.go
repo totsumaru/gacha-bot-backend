@@ -33,7 +33,13 @@ func (t Title) IsEmpty() bool {
 }
 
 // 埋め込みのタイトルを検証します
+//
+// 空を許容します。
 func (t Title) validate() error {
+	if t.IsEmpty() {
+		return nil
+	}
+
 	if len([]rune(t.value)) > 256 {
 		return errors.NewError("送信埋め込みのタイトルの最大文字数を超えています")
 	}

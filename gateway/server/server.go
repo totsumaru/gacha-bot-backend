@@ -73,7 +73,7 @@ func (g Gateway) Update(server server.Server) error {
 	return nil
 }
 
-// IDでアクションを取得します
+// IDでサーバーを取得します
 //
 // レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByID(id domain.DiscordID) (server.Server, error) {
@@ -81,7 +81,7 @@ func (g Gateway) FindByID(id domain.DiscordID) (server.Server, error) {
 
 	var dbServer gateway.Server
 	if err := g.tx.First(&dbServer, "id = ?", id.String()).Error; err != nil {
-		return res, errors.NewError("IDでアクションを取得できません", err)
+		return res, errors.NewError("IDでサーバーを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します
@@ -93,7 +93,7 @@ func (g Gateway) FindByID(id domain.DiscordID) (server.Server, error) {
 	return res, nil
 }
 
-// FOR UPDATEでアクションを取得します
+// FOR UPDATEでサーバーを取得します
 //
 // レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByIDForUpdate(id domain.DiscordID) (server.Server, error) {
@@ -103,7 +103,7 @@ func (g Gateway) FindByIDForUpdate(id domain.DiscordID) (server.Server, error) {
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbServer, "id = ?", id.String(),
 	).Error; err != nil {
-		return res, errors.NewError("IDでアクションを取得できません", err)
+		return res, errors.NewError("IDでサーバーを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します

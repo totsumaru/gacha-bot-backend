@@ -2,6 +2,7 @@ package gacha
 
 import (
 	"encoding/json"
+	defaultError "errors"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
@@ -63,7 +64,6 @@ func (g Gateway) Upsert(gacha gacha.Gacha) error {
 		Columns:   []clause.Column{{Name: "id"}}, // IDをキーとして使用
 		UpdateAll: true,                          // 衝突した場合、すべての列を更新
 	}).Create(&dbGacha)
-
 	if result.Error != nil {
 		return errors.NewError("レコードの更新/作成に失敗しました", result.Error)
 	}
@@ -71,19 +71,24 @@ func (g Gateway) Upsert(gacha gacha.Gacha) error {
 	return nil
 }
 
-// IDでアクションを取得します
+// IDでガチャを取得します
 //
 // レコードが存在しない場合はエラーを返します。
-func (g Gateway) FindByID(id domain.DiscordID) (gacha.Gacha, error) {
+func (g Gateway) FindByID(id domain.UUID) (gacha.Gacha, error) {
 	var res gacha.Gacha
 
 	var dbGacha gateway.Gacha
-	if err := g.tx.First(&dbGacha, "id = ?", id.String()).Error; err != nil {
-		return res, errors.NewError("IDでアクションを取得できません", err)
+	err := g.tx.First(&dbGacha, "id = ?", id.String()).Error
+	if err != nil {
+		if defaultError.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが存在しない場合、NotFoundErrorを返します
+			return res, errors.NotFoundError{}
+		}
+		return res, errors.NewError("IDでガチャを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します
-	res, err := castToDomainModel(dbGacha)
+	res, err = castToDomainModel(dbGacha)
 	if err != nil {
 		return res, errors.NewError("DBをドメインモデルに変換できません", err)
 	}
@@ -91,7 +96,32 @@ func (g Gateway) FindByID(id domain.DiscordID) (gacha.Gacha, error) {
 	return res, nil
 }
 
-// FOR UPDATEでアクションを取得します
+// サーバーIDでガチャを取得します
+//
+// レコードが存在しない場合はエラーを返します。
+func (g Gateway) FindByServerID(serverID domain.DiscordID) (gacha.Gacha, error) {
+	var res gacha.Gacha
+
+	var dbGacha gateway.Gacha
+	err := g.tx.First(&dbGacha, "server_id = ?", serverID.String()).Error
+	if err != nil {
+		if defaultError.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが存在しない場合、NotFoundErrorを返します
+			return res, errors.NotFoundError{}
+		}
+		return res, errors.NewError("IDでガチャを取得できません", err)
+	}
+
+	// DB->ドメインモデルに変換します
+	res, err = castToDomainModel(dbGacha)
+	if err != nil {
+		return res, errors.NewError("DBをドメインモデルに変換できません", err)
+	}
+
+	return res, nil
+}
+
+// FOR UPDATEでガチャを取得します
 //
 // レコードが存在しない場合はエラーを返します。
 func (g Gateway) FindByIDForUpdate(id domain.DiscordID) (gacha.Gacha, error) {
@@ -101,7 +131,7 @@ func (g Gateway) FindByIDForUpdate(id domain.DiscordID) (gacha.Gacha, error) {
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbGacha, "id = ?", id.String(),
 	).Error; err != nil {
-		return res, errors.NewError("IDでアクションを取得できません", err)
+		return res, errors.NewError("IDでガチャを取得できません", err)
 	}
 
 	// DB->ドメインモデルに変換します
@@ -143,6 +173,7 @@ func castToDBStruct(gacha gacha.Gacha) (gateway.Gacha, error) {
 	}
 
 	dbGacha.ID = gacha.ID().String()
+	dbGacha.ServerID = gacha.ServerID().String()
 	dbGacha.Data = b
 
 	return dbGacha, nil

@@ -1,96 +1,95 @@
 package gacha
 
 import (
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/totsumaru/gacha-bot-backend/app/gacha"
+	"github.com/totsumaru/gacha-bot-backend/lib/auth"
+	"github.com/totsumaru/gacha-bot-backend/lib/errors"
+	"gorm.io/gorm"
 )
 
-// ========================
-// ガチャのAPIの共通処理です
-// ========================
+// ガチャを取得します
+func GetGacha(e *gin.Engine, db *gorm.DB) {
+	e.GET("/api/gacha", func(c *gin.Context) {
+		serverID := c.Query("server_id")
+		authHeader := c.GetHeader(auth.HeaderAuthorization)
 
-// ガチャのリクエストです
-type GachaReq struct {
-	ServerID string      `json:"server_id"`
-	Panel    EmbedReq    `json:"panel"`
-	Open     EmbedReq    `json:"open"`
-	Result   []ResultReq `json:"result"`
+		var userID string
+
+		// verify
+		{
+			if serverID == "" || authHeader == "" {
+				errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
+					"serverID: %s, authHeader: %s", serverID, authHeader,
+				))
+				return
+			}
+
+			headerRes, err := auth.GetAuthHeader(authHeader)
+			if err != nil {
+				errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
+				return
+			}
+			userID = headerRes.DiscordID
+
+			if err = auth.IsAdmin(serverID, userID); err != nil {
+				errors.HandleError(c, 401, "管理者ではありません", err)
+				return
+			}
+		}
+
+		res := GachaRes{}
+		err := db.Transaction(func(tx *gorm.DB) error {
+			ga, err := gacha.FindByServerID(tx, serverID)
+			if err != nil {
+				return err
+			}
+
+			res = ConvertToAPIGachaRes(ga)
+
+			return nil
+		})
+		if err != nil {
+			if errors.IsNotFoundError(err) {
+				res.ID = uuid.NewString()
+				res.ServerID = serverID
+				res.Panel.Button = []ButtonReq{createPanelBtn()}
+				res.Open.Button = []ButtonReq{createOpenBtn()}
+				res.Result = []ResultReq{{
+					Embed:       EmbedReq{},
+					Point:       0,
+					Probability: 100,
+				}}
+
+				c.JSON(http.StatusOK, res)
+				return
+			}
+			errors.HandleError(c, 500, "ガチャを取得できません", err)
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	})
 }
 
-// 結果のリクエストです
-type ResultReq struct {
-	Embed       EmbedReq `json:"embed"`
-	Point       int      `json:"point"`
-	Probability int      `json:"probability"`
-}
-
-// ガチャの埋め込みのリクエストです
-type EmbedReq struct {
-	Title        string      `json:"title"`
-	Description  string      `json:"description"`
-	Color        int         `json:"color"`
-	ImageURL     string      `json:"image_url"`
-	ThumbnailURL string      `json:"thumbnail_url"`
-	Button       []ButtonReq `json:"button"`
-}
-
-// ボタンのリクエストです
-type ButtonReq struct {
-	Kind  string `json:"kind"`
-	Label string `json:"label"`
-	Style string `json:"style"`
-}
-
-// APIのリクエストをAppのリクエストに変換します
-func ConvertToAppGachaReq(apiGachaReq GachaReq) gacha.GachaReq {
-	panel := convertToAppEmbedReq(apiGachaReq.Panel)
-	open := convertToAppEmbedReq(apiGachaReq.Open)
-
-	var results []gacha.ResultReq
-	for _, apiResult := range apiGachaReq.Result {
-		results = append(results, convertToAppResultReq(apiResult))
-	}
-
-	return gacha.GachaReq{
-		ServerID: apiGachaReq.ServerID,
-		Panel:    panel,
-		Open:     open,
-		Result:   results,
-	}
-}
-
-// 結果のリクエストをAppのリクエストに変換します
-func convertToAppResultReq(apiResultReq ResultReq) gacha.ResultReq {
-	embed := convertToAppEmbedReq(apiResultReq.Embed)
-
-	return gacha.ResultReq{
-		Embed:       embed,
-		Point:       apiResultReq.Point,
-		Probability: apiResultReq.Probability,
-	}
-}
-
-// 埋め込みのリクエストをAppのリクエストに変換します
-func convertToAppEmbedReq(apiEmbedReq EmbedReq) gacha.EmbedReq {
-	var btns []gacha.ButtonReq
-	for _, apiBtn := range apiEmbedReq.Button {
-		btns = append(btns, convertToAppButtonReq(apiBtn))
-	}
-
-	return gacha.EmbedReq{
-		Title:        apiEmbedReq.Title,
-		Description:  apiEmbedReq.Description,
-		Color:        apiEmbedReq.Color,
-		ImageURL:     apiEmbedReq.ImageURL,
-		ThumbnailURL: apiEmbedReq.ThumbnailURL,
-		Button:       btns,
+// panelのボタンを作成します
+func createPanelBtn() ButtonReq {
+	return ButtonReq{
+		Kind:  "to_open",
+		Label: "ガチャを回す",
+		Style: "PRIMARY",
 	}
 }
 
-// ボタンのリクエストをAppのリクエストに変換します
-func convertToAppButtonReq(apiButtonReq ButtonReq) gacha.ButtonReq {
-	return gacha.ButtonReq{
-		Kind:  apiButtonReq.Kind,
-		Label: apiButtonReq.Label,
-		Style: apiButtonReq.Style,
+// openのボタンを作成します
+func createOpenBtn() ButtonReq {
+	return ButtonReq{
+		Kind:  "to_result",
+		Label: "結果を見る",
+		Style: "PRIMARY",
 	}
 }

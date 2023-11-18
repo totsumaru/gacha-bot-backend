@@ -34,6 +34,10 @@ func (d Description) IsEmpty() bool {
 
 // 内容を検証します
 func (d Description) validate() error {
+	if d.IsEmpty() {
+		return errors.NewError("内容が空です")
+	}
+
 	if len([]rune(d.value)) > 1500 {
 		return errors.NewError("送信内容の最大文字数を超えています")
 	}

@@ -44,9 +44,9 @@ func (d DiscordID) validate() error {
 // DiscordのIDをJSONに変換します
 func (d DiscordID) MarshalJSON() ([]byte, error) {
 	data := struct {
-		DiscordID string `json:"discord_id"`
+		Value string `json:"value"`
 	}{
-		DiscordID: d.value,
+		Value: d.value,
 	}
 
 	return json.Marshal(data)
@@ -55,14 +55,14 @@ func (d DiscordID) MarshalJSON() ([]byte, error) {
 // JSONからDiscordのIDを復元します
 func (d *DiscordID) UnmarshalJSON(b []byte) error {
 	data := struct {
-		DiscordID string `json:"discord_id"`
+		Value string `json:"value"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
 		return errors.NewError("JSONからDiscordIDの復元に失敗しました", err)
 	}
 
-	d.value = data.DiscordID
+	d.value = data.Value
 
 	return nil
 }

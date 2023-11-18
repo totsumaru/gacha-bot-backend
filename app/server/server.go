@@ -1,8 +1,6 @@
 package server
 
 import (
-	"fmt"
-
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/server"
 	"github.com/totsumaru/gacha-bot-backend/domain/server/stripe"
@@ -47,11 +45,6 @@ func StartSubscription(
 	tx *gorm.DB,
 	id, subscriberID, customerID, subscriptionID string,
 ) error {
-	fmt.Println("id: ", id)
-	fmt.Println("subscriberID: ", subscriberID)
-	fmt.Println("customerID: ", customerID)
-	fmt.Println("subscriptionID: ", subscriptionID)
-
 	serverID, err := domain.NewDiscordID(id)
 	if err != nil {
 		return errors.NewError("IDを作成できません", err)

@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
@@ -19,7 +18,7 @@ import (
 // cloudflareに画像をアップロードします
 //
 // 公開URLを返します。
-func Upload(c *gin.Context, image *multipart.FileHeader) (string, error) {
+func Upload(image *multipart.FileHeader) (string, error) {
 	var bucketName = "gacha-bot"
 	var accessKeyId = os.Getenv("CLOUDFLARE_S3_ACCESS_KEY")
 	var accessKeySecret = os.Getenv("CLOUDFLARE_S3_SECRET_ACCESS_KEY")

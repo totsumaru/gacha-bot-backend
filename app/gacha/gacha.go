@@ -10,6 +10,7 @@ import (
 
 // ガチャのリクエストです
 type GachaReq struct {
+	ID       string
 	ServerID string
 	Panel    EmbedReq
 	Open     EmbedReq
@@ -102,7 +103,7 @@ func createEmbed(req EmbedReq) (embed.Embed, error) {
 		return embed.Embed{}, errors.NewError("サムネイルURLの生成に失敗しました", err)
 	}
 
-	var b []button.Button
+	b := make([]button.Button, 0)
 	for _, v := range req.Button {
 		kind, err := button.NewKind(v.Kind)
 		if err != nil {

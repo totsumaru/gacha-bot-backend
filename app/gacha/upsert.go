@@ -1,6 +1,8 @@
 package gacha
 
 import (
+	"fmt"
+
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	gatewayGacha "github.com/totsumaru/gacha-bot-backend/gateway/gacha"
@@ -9,11 +11,13 @@ import (
 )
 
 // ガチャをUpsertします
-func UpsertGacha(tx *gorm.DB, id string, req GachaReq) (gacha.Gacha, error) {
-	i, err := domain.RestoreUUID(id)
+func UpsertGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
+	i, err := domain.RestoreUUID(req.ID)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("DiscordIDの生成に失敗しました", err)
 	}
+
+	fmt.Println("ID: ", i.String())
 
 	sID, err := domain.NewDiscordID(req.ServerID)
 	if err != nil {
