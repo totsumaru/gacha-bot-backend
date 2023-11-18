@@ -66,8 +66,8 @@ func Checkout(e *gin.Engine) {
 
 		FEURL := os.Getenv("FRONTEND_URL")
 
-		successURL := fmt.Sprintf("%s/dashboard/%s/success", FEURL, serverID)
-		cancelURL := fmt.Sprintf("%s/dashboard/%s/config", FEURL, serverID)
+		successURL := fmt.Sprintf("%s/server/%s/dashboard", FEURL, serverID)
+		cancelURL := fmt.Sprintf("%s/server/%s/dashboard", FEURL, serverID)
 
 		params := &stripe.CheckoutSessionParams{
 			SuccessURL: stripe.String(successURL),

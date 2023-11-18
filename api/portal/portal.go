@@ -65,7 +65,7 @@ func CreateCustomerPortal(e *gin.Engine, db *gorm.DB) {
 
 			// カスタマーポータルから戻るボタンで、遷移するURLを作成
 			returnURL := fmt.Sprintf(
-				"%s/dashboard/%s/config",
+				"%s/server/%s/dashboard",
 				os.Getenv("FRONTEND_URL"),
 				serverID,
 			)

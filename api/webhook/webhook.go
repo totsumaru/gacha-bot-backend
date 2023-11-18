@@ -35,11 +35,9 @@ func Webhook(e *gin.Engine, db *gorm.DB) {
 		}
 
 		err = db.Transaction(func(tx *gorm.DB) error {
-			fmt.Println(event.Type)
 			// イベントオブジェクトのdocument
 			switch event.Type {
 			case "checkout.session.completed":
-				fmt.Println("サブスクを開始しました")
 				// Checkout で顧客が「支払う」または「登録」ボタンをクリックすると送信され、新しい購入が通知されます。
 				// `CUSTOMER_ID`をDBに登録する必要があります。
 				customerID := event.Data.Object["customer"].(string)
@@ -53,7 +51,6 @@ func Webhook(e *gin.Engine, db *gorm.DB) {
 				); err != nil {
 					return errors.NewError("サブスクリプションを開始できません", err)
 				}
-				fmt.Println("サブスクを開始しました-終了")
 			case "invoice.paid":
 				// MEMO: 何を実装すべきか不明
 				// 請求期間ごとに、支払いが成功すると送信されるイベントです。
