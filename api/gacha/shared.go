@@ -1,7 +1,7 @@
 package gacha
 
 import (
-	"github.com/totsumaru/gacha-bot-backend/app/gacha"
+	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed/button"

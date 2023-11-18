@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/application/server"
 	domainServer "github.com/totsumaru/gacha-bot-backend/domain/server"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"

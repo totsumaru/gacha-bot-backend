@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76/webhook"
-	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"

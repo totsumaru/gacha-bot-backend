@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/totsumaru/gacha-bot-backend/app/gacha"
+	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"

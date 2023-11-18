@@ -2,7 +2,7 @@ package message_create
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"

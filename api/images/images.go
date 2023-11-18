@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/totsumaru/gacha-bot-backend/app/cloudflare"
+	"github.com/totsumaru/gacha-bot-backend/application/cloudflare"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )

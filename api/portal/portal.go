@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/billingportal/session"
-	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
