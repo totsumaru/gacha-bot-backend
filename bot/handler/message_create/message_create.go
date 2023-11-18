@@ -16,10 +16,14 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err := bot.DB.Transaction(func(tx *gorm.DB) error {
 		switch m.Content {
 		case "!gacha-setup":
+			dashboardURL := os.Getenv("FRONTEND_URL") + "/dashboard" + m.GuildID
 			// すでに登録されている場合は、返信を返すのみ
 			_, err := server.FindByID(tx, m.GuildID)
 			if err == nil {
-				if _, err = s.ChannelMessageSend(m.ChannelID, "すでに登録されています"); err != nil {
+				if _, err = s.ChannelMessageSend(
+					m.ChannelID,
+					fmt.Sprintf("すでに登録されています。以下のURLから設定を進めてください。\n%s", dashboardURL),
+				); err != nil {
 					return errors.NewError("メッセージの送信に失敗しました", err)
 				}
 				return nil
@@ -29,14 +33,9 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return errors.NewError("サーバーの作成に失敗しました", err)
 			}
 
-			txt := `
-セットアップが完了しました。
-以下のURLから設定を進めてください。
-%s
-`
 			if _, err = s.ChannelMessageSend(
 				m.ChannelID,
-				fmt.Sprintf(txt, os.Getenv("FRONTEND_URL")+"/server/"+m.GuildID),
+				fmt.Sprintf("セットアップが完了しました。以下のURLから設定を進めてください。\n%s", dashboardURL),
 			); err != nil {
 				return errors.NewError("メッセージの送信に失敗しました", err)
 			}
