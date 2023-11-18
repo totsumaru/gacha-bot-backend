@@ -92,6 +92,7 @@ func main() {
 			// アクセスを許可したいアクセス元
 			AllowOrigins: []string{
 				"http://localhost:3000",
+				"https://gacha-bot.com",
 			},
 			// アクセスを許可したいHTTPメソッド
 			AllowMethods: []string{
