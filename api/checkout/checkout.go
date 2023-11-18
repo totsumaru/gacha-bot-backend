@@ -79,6 +79,9 @@ func Checkout(e *gin.Engine) {
 					Quantity: stripe.Int64(1),
 				},
 			},
+			SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+				TrialPeriodDays: stripe.Int64(14), // 14日間の無料トライアルを追加
+			},
 		}
 		params.AddMetadata("guild_id", guild.ID)
 		params.AddMetadata("discord_id", u.ID)
