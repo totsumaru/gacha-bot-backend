@@ -29,7 +29,7 @@ func Checkout(e *gin.Engine) {
 
 		var userID string
 
-		//// verify
+		// verify
 		{
 			if serverID == "" || authHeader == "" {
 				errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(

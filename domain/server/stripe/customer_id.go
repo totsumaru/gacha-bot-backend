@@ -25,7 +25,7 @@ func NewCustomerID(v string) (CustomerID, error) {
 }
 
 // カスタマーIDを取得します
-func (i CustomerID) Value() string {
+func (i CustomerID) String() string {
 	return i.value
 }
 

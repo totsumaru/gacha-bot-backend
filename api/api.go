@@ -7,6 +7,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/api/gacha/upsert"
 	"github.com/totsumaru/gacha-bot-backend/api/images"
 	"github.com/totsumaru/gacha-bot-backend/api/portal"
+	"github.com/totsumaru/gacha-bot-backend/api/server"
 	"github.com/totsumaru/gacha-bot-backend/api/webhook"
 	"gorm.io/gorm"
 )
@@ -20,6 +21,7 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	upsert.UpsertGacha(e, db)
 	images.UploadImages(e)
 	gacha.GetGacha(e, db)
+	server.GetServer(e, db)
 }
 
 // ルートです

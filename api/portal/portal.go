@@ -9,6 +9,7 @@ import (
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/billingportal/session"
 	"github.com/totsumaru/gacha-bot-backend/app/server"
+	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -22,34 +23,34 @@ type Res struct {
 func CreateCustomerPortal(e *gin.Engine, db *gorm.DB) {
 	// カスタマーポータルのURLを作成します
 	e.POST("/api/portal", func(c *gin.Context) {
-		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 		serverID := c.Query("server_id")
-		//authHeader := c.GetHeader(auth.HeaderAuthorization)
+		authHeader := c.GetHeader(auth.HeaderAuthorization)
+
+		stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
 		var userID string
-		userID = "960104306151948328" // TODO: テスト用のため削除する
 
 		// verify
-		//{
-		//	if serverID == "" || authHeader == "" {
-		//		errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
-		//			"serverID: %s, authHeader: %s", serverID, authHeader,
-		//		))
-		//		return
-		//	}
-		//
-		//	headerRes, err := auth.GetAuthHeader(authHeader)
-		//	if err != nil {
-		//		errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
-		//		return
-		//	}
-		//	userID = headerRes.DiscordID
-		//
-		//	if err = auth.IsAdmin(serverID, headerRes.DiscordID); err != nil {
-		//		errors.HandleError(c, 401, "必要な権限を持っていません", err)
-		//		return
-		//	}
-		//}
+		{
+			if serverID == "" || authHeader == "" {
+				errors.HandleError(c, 400, "リクエストが不正です", fmt.Errorf(
+					"serverID: %s, authHeader: %s", serverID, authHeader,
+				))
+				return
+			}
+
+			headerRes, err := auth.GetAuthHeader(authHeader)
+			if err != nil {
+				errors.HandleError(c, 401, "トークンの認証に失敗しました", err)
+				return
+			}
+			userID = headerRes.DiscordID
+
+			if err = auth.IsAdmin(serverID, headerRes.DiscordID); err != nil {
+				errors.HandleError(c, 401, "必要な権限を持っていません", err)
+				return
+			}
+		}
 
 		var url string
 		err := db.Transaction(func(tx *gorm.DB) error {
@@ -71,7 +72,7 @@ func CreateCustomerPortal(e *gin.Engine, db *gorm.DB) {
 
 			// customerIdからカスタマーポータルURLを作成
 			params := &stripe.BillingPortalSessionParams{
-				Customer:  stripe.String(apiRes.Stripe().CustomerID().Value()),
+				Customer:  stripe.String(apiRes.Stripe().CustomerID().String()),
 				ReturnURL: stripe.String(returnURL),
 			}
 
