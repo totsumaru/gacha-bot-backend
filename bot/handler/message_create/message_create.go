@@ -8,6 +8,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/bot"
+	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -16,6 +17,17 @@ import (
 func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	switch m.Content {
 	case "!gacha-setup":
+		// 管理者以外は実行できません
+		if auth.IsAdmin(m.GuildID, m.Author.ID) != nil {
+			if _, err := s.ChannelMessageSend(
+				m.ChannelID,
+				"このコマンドは管理者のみ実行できます",
+			); err != nil {
+				errors.SendErrMsg(s, errors.NewError("メッセージの送信に失敗しました", err), m.GuildID)
+				return
+			}
+			return
+		}
 		err := bot.DB.Transaction(func(tx *gorm.DB) error {
 			dashboardURL := os.Getenv("FRONTEND_URL") + "/server/" + m.GuildID
 			// すでに登録されている場合は、返信を返すのみ
@@ -47,6 +59,16 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	case "!gacha-panel":
+		if auth.IsAdmin(m.GuildID, m.Author.ID) != nil {
+			if _, err := s.ChannelMessageSend(
+				m.ChannelID,
+				"このコマンドは管理者のみ実行できます",
+			); err != nil {
+				errors.SendErrMsg(s, errors.NewError("メッセージの送信に失敗しました", err), m.GuildID)
+				return
+			}
+			return
+		}
 		err := bot.DB.Transaction(func(tx *gorm.DB) error {
 			ga, err := gacha.FindByServerID(tx, m.GuildID)
 			if err != nil {
