@@ -23,7 +23,7 @@ func SendOpen(
 
 	// 現在のカウントを取得する
 	ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
-	if err != nil {
+	if err != nil && !errors.IsNotFoundError(err) {
 		return errors.NewError("ユーザーデータを取得できません", err)
 	}
 	// カウントが今日かつ、1回以上の場合は、エラーメッセージを送信する
