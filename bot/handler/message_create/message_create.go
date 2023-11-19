@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/application/server"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -39,7 +40,17 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			); err != nil {
 				return errors.NewError("メッセージの送信に失敗しました", err)
 			}
+		case "!gacha-panel":
+			ga, err := gacha.FindByServerID(tx, m.GuildID)
+			if err != nil {
+				return errors.NewError("ガチャの取得に失敗しました", err)
+			}
+
+			if err = SendPanel(s, m, ga); err != nil {
+				return errors.NewError("パネルメッセージの送信に失敗しました", err)
+			}
 		}
+
 		return nil
 	})
 	if err != nil {
