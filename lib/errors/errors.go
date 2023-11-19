@@ -19,7 +19,7 @@ type Error struct {
 	Previous error
 }
 
-const AdminServerID = "984614055681613864"
+const AdminLogChannelID = "1170723690644766852"
 
 // エラーメッセージを送信します
 func SendErrMsg(s *discordgo.Session, e error, guildID string) {
@@ -46,7 +46,7 @@ func SendErrMsg(s *discordgo.Session, e error, guildID string) {
 		Timestamp:   time.Now().Format("2006-01-02T15:04:05+09:00"),
 	}
 
-	_, err := s.ChannelMessageSendEmbed(AdminServerID, embed)
+	_, err := s.ChannelMessageSendEmbed(AdminLogChannelID, embed)
 	if err != nil {
 		log.Println(err)
 	}
