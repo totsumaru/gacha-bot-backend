@@ -28,7 +28,7 @@ func SendPanel(s *discordgo.Session, m *discordgo.MessageCreate, gachaDomain gac
 		Image: &discordgo.MessageEmbedImage{
 			URL: gachaDomain.Panel().ImageURL().String(),
 		},
-		Title:       "ロールガチャ",
+		Title:       gachaDomain.Panel().Title().String(),
 		Description: gachaDomain.Panel().Description().String(),
 		Color:       gachaDomain.Panel().Color().Int(),
 	}
