@@ -3,6 +3,7 @@ package interaction_craete
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
+	"github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed/button"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -42,6 +43,22 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 					return errors.NewError("結果を送信できません", err)
 				}
 
+				return nil
+			})
+			if err != nil {
+				errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), i.GuildID)
+				return
+			}
+		case "check_point":
+			err := bot.DB.Transaction(func(tx *gorm.DB) error {
+				ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
+				if err != nil {
+					return errors.NewError("ユーザーデータを取得できません", err)
+				}
+
+				if err = SendPoint(s, i, ud.Point().Int()); err != nil {
+					return errors.NewError("ポイントを送信できません", err)
+				}
 				return nil
 			})
 			if err != nil {

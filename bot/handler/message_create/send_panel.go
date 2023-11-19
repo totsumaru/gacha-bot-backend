@@ -14,8 +14,14 @@ func SendPanel(s *discordgo.Session, m *discordgo.MessageCreate, gachaDomain gac
 		CustomID: gachaDomain.Panel().Button()[0].Kind().String(),
 	}
 
+	btn2 := discordgo.Button{
+		Label:    "ポイント確認",
+		Style:    discordgo.SecondaryButton,
+		CustomID: "check_point",
+	}
+
 	actions := discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{btn1},
+		Components: []discordgo.MessageComponent{btn1, btn2},
 	}
 
 	embed := &discordgo.MessageEmbed{
