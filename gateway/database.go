@@ -12,3 +12,9 @@ type Gacha struct {
 	ServerID string `gorm:"type:varchar(255);not null;index:idx_server_id"`
 	Data     []byte `gorm:"type:jsonb"`
 }
+
+// ユーザーデータのDBスキーマです
+type UserData struct {
+	ID   string `gorm:"type:varchar(255);primary_key;"`
+	Data []byte `gorm:"type:jsonb"`
+}
