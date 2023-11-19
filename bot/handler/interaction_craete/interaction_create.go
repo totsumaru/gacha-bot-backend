@@ -52,7 +52,7 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 		case "check_point":
 			err := bot.DB.Transaction(func(tx *gorm.DB) error {
 				ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
-				if err != nil {
+				if err != nil && !errors.IsNotFoundError(err) {
 					return errors.NewError("ユーザーデータを取得できません", err)
 				}
 
