@@ -14,9 +14,9 @@ import (
 
 // メッセージが作成された時のハンドラです
 func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	err := bot.DB.Transaction(func(tx *gorm.DB) error {
-		switch m.Content {
-		case "!gacha-setup":
+	switch m.Content {
+	case "!gacha-setup":
+		err := bot.DB.Transaction(func(tx *gorm.DB) error {
 			dashboardURL := os.Getenv("FRONTEND_URL") + "/server/" + m.GuildID
 			// すでに登録されている場合は、返信を返すのみ
 			_, err := server.FindByID(tx, m.GuildID)
@@ -40,7 +40,14 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			); err != nil {
 				return errors.NewError("メッセージの送信に失敗しました", err)
 			}
-		case "!gacha-panel":
+			return nil
+		})
+		if err != nil {
+			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
+			return
+		}
+	case "!gacha-panel":
+		err := bot.DB.Transaction(func(tx *gorm.DB) error {
 			ga, err := gacha.FindByServerID(tx, m.GuildID)
 			if err != nil {
 				return errors.NewError("ガチャの取得に失敗しました", err)
@@ -49,12 +56,11 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if err = SendPanel(s, m, ga); err != nil {
 				return errors.NewError("パネルメッセージの送信に失敗しました", err)
 			}
+			return nil
+		})
+		if err != nil {
+			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
+			return
 		}
-
-		return nil
-	})
-	if err != nil {
-		errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
-		return
 	}
 }
