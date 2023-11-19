@@ -78,7 +78,11 @@ func main() {
 
 	// テーブルが存在していない場合のみテーブルを作成します
 	// 存在している場合はスキーマを同期します
-	if err = db.AutoMigrate(&gateway.Server{}, &gateway.Gacha{}); err != nil {
+	if err = db.AutoMigrate(
+		&gateway.Server{},
+		&gateway.Gacha{},
+		&gateway.UserData{},
+	); err != nil {
 		panic(errors.NewError("テーブルのスキーマが一致しません", err))
 	}
 
