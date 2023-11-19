@@ -5,13 +5,20 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
+	"gorm.io/gorm"
 )
 
 // 結果メッセージを送信します
-func SendResult(s *discordgo.Session, i *discordgo.InteractionCreate, domainGacha gacha.Gacha) error {
+func SendResult(
+	tx *gorm.DB,
+	s *discordgo.Session,
+	i *discordgo.InteractionCreate,
+	domainGacha gacha.Gacha,
+) error {
 	editFunc, err := SendInteractionWaitingMessage(s, i, true, true)
 	if err != nil {
 		return errors.NewError("Waitingメッセージが送信できません")
@@ -32,6 +39,13 @@ func SendResult(s *discordgo.Session, i *discordgo.InteractionCreate, domainGach
 	}
 	if _, err = editFunc(i.Interaction, webhook); err != nil {
 		return errors.NewError("レスポンスを送信できません", err)
+	}
+
+	// ポイントを追加
+	if err = user_data.AddPoint(
+		tx, i.GuildID, i.Member.User.ID, r.Point().Int(),
+	); err != nil {
+		return errors.NewError("ポイントを追加できません", err)
 	}
 
 	return nil

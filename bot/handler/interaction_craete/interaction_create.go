@@ -38,9 +38,10 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 					return errors.NewError("ガチャを取得できません", err)
 				}
 
-				if err = SendResult(s, i, ga); err != nil {
+				if err = SendResult(tx, s, i, ga); err != nil {
 					return errors.NewError("結果を送信できません", err)
 				}
+
 				return nil
 			})
 			if err != nil {

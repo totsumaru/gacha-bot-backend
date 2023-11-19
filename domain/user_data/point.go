@@ -25,7 +25,7 @@ func NewPoint(value int) (Point, error) {
 }
 
 // ポイントの合計を返します
-func (p Point) String() int {
+func (p Point) Int() int {
 	return p.value
 }
 

@@ -2,6 +2,7 @@ package user_data
 
 import (
 	"encoding/json"
+	defaultError "errors"
 
 	"github.com/totsumaru/gacha-bot-backend/domain/user_data"
 	"github.com/totsumaru/gacha-bot-backend/gateway"
@@ -55,7 +56,13 @@ func (g Gateway) FindByID(id user_data.ID) (user_data.UserData, error) {
 
 	var dbUserData gateway.UserData
 	if err := g.tx.First(&dbUserData, "id = ?", id.String()).Error; err != nil {
-		return res, errors.NewError("IDでユーザーデータを取得できません", err)
+		if err != nil {
+			if defaultError.Is(err, gorm.ErrRecordNotFound) {
+				// レコードが存在しない場合、NotFoundErrorを返します
+				return res, errors.NotFoundError{}
+			}
+			return res, errors.NewError("IDでユーザーデータを取得できません", err)
+		}
 	}
 
 	// DB->ドメインモデルに変換します
@@ -77,6 +84,10 @@ func (g Gateway) FindByIDForUpdate(id user_data.ID) (user_data.UserData, error) 
 	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").First(
 		&dbUserData, "id = ?", id.String(),
 	).Error; err != nil {
+		if defaultError.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが存在しない場合、NotFoundErrorを返します
+			return res, errors.NotFoundError{}
+		}
 		return res, errors.NewError("IDでユーザーデータを取得できません", err)
 	}
 
