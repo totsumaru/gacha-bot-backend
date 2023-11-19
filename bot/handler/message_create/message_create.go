@@ -50,6 +50,15 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		err := bot.DB.Transaction(func(tx *gorm.DB) error {
 			ga, err := gacha.FindByServerID(tx, m.GuildID)
 			if err != nil {
+				if errors.IsNotFoundError(err) {
+					if _, err = s.ChannelMessageSend(
+						m.ChannelID,
+						"情報が登録されていません。「!gacha-setup」を実行して登録してください",
+					); err != nil {
+						return errors.NewError("メッセージの送信に失敗しました", err)
+					}
+					return nil
+				}
 				return errors.NewError("ガチャの取得に失敗しました", err)
 			}
 
