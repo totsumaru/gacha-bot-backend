@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
+	"github.com/totsumaru/gacha-bot-backend/domain/user_data/count"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
@@ -13,6 +14,7 @@ type UserData struct {
 	serverID domain.DiscordID
 	userID   domain.DiscordID
 	point    Point
+	count    count.Count
 }
 
 // ユーザーデータを作成します
@@ -20,6 +22,7 @@ func NewUserData(
 	serverID domain.DiscordID,
 	userID domain.DiscordID,
 	point Point,
+	count count.Count,
 ) (UserData, error) {
 	id, err := NewID(serverID, userID)
 	if err != nil {
@@ -31,6 +34,7 @@ func NewUserData(
 		serverID: serverID,
 		userID:   userID,
 		point:    point,
+		count:    count,
 	}
 
 	if err = p.validate(); err != nil {
@@ -44,7 +48,17 @@ func NewUserData(
 func (p UserData) UpdatePoint(point Point) error {
 	p.point = point
 	if err := p.validate(); err != nil {
-		return errors.NewError("ユーザーデータの更新に失敗しました", err)
+		return errors.NewError("ポイントの更新に失敗しました", err)
+	}
+
+	return nil
+}
+
+// 1日の上限回数を更新します
+func (p UserData) UpdateCount(count count.Count) error {
+	p.count = count
+	if err := p.validate(); err != nil {
+		return errors.NewError("1日の上限回数の更新に失敗しました", err)
 	}
 
 	return nil
@@ -70,6 +84,11 @@ func (p UserData) Point() Point {
 	return p.point
 }
 
+// 1日の上限回数を返します
+func (p UserData) Count() count.Count {
+	return p.count
+}
+
 // 検証します
 func (p UserData) validate() error {
 	return nil
@@ -82,11 +101,13 @@ func (p UserData) MarshalJSON() ([]byte, error) {
 		ServerID domain.DiscordID `json:"server_id"`
 		UserID   domain.DiscordID `json:"user_id"`
 		Point    Point            `json:"point"`
+		Count    count.Count      `json:"count"`
 	}{
 		ID:       p.id,
 		ServerID: p.serverID,
 		UserID:   p.userID,
 		Point:    p.point,
+		Count:    p.count,
 	}
 
 	return json.Marshal(data)
@@ -99,6 +120,7 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 		ServerID domain.DiscordID `json:"server_id"`
 		UserID   domain.DiscordID `json:"user_id"`
 		Point    Point            `json:"point"`
+		Count    count.Count      `json:"count"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -109,6 +131,7 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 	p.serverID = data.ServerID
 	p.userID = data.UserID
 	p.point = data.Point
+	p.count = data.Count
 
 	return nil
 }

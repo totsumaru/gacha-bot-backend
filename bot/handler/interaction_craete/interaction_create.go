@@ -23,7 +23,7 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 					return errors.NewError("ガチャを取得できません", err)
 				}
 
-				if err = SendOpen(s, i, ga); err != nil {
+				if err = SendOpen(tx, s, i, ga); err != nil {
 					return errors.NewError("Openのメッセージを送信できません", err)
 				}
 				return nil
