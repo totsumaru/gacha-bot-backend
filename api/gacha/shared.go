@@ -1,11 +1,13 @@
 package gacha
 
 import (
+	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed/button"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
+	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
 // ========================
@@ -16,11 +18,26 @@ import (
 //
 // リクエストにIDを追加しています。
 type GachaRes struct {
-	ID       string      `json:"id"`
-	ServerID string      `json:"server_id"`
-	Panel    EmbedReq    `json:"panel"`
-	Open     EmbedReq    `json:"open"`
-	Result   []ResultReq `json:"result"`
+	ID       string             `json:"id"`
+	ServerID string             `json:"server_id"`
+	Panel    EmbedReq           `json:"panel"`
+	Open     EmbedReq           `json:"open"`
+	Result   []ResultReq        `json:"result"`
+	Role     []RoleWithPointRes `json:"role"`
+	AllRole  []RoleRes          `json:"all_role"`
+}
+
+// ロールのレスポンスです
+type RoleRes struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// ロールのレスポンスです(Pointあり)
+type RoleWithPointRes struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Point int    `json:"point"`
 }
 
 // ガチャのリクエストです
@@ -30,6 +47,7 @@ type GachaReq struct {
 	Panel    EmbedReq    `json:"panel"`
 	Open     EmbedReq    `json:"open"`
 	Result   []ResultReq `json:"result"`
+	Role     []RoleReq   `json:"role"`
 }
 
 // 結果のリクエストです
@@ -56,6 +74,12 @@ type ButtonReq struct {
 	Style string `json:"style"`
 }
 
+// ロールのリクエストです
+type RoleReq struct {
+	ID    string `json:"id"`
+	Point int    `json:"point"`
+}
+
 // =============================================
 // APIのリクエスト -> Appのリクエスト に変換します
 // =============================================
@@ -70,12 +94,22 @@ func ConvertToAppGachaReq(apiGachaReq GachaReq) gacha.GachaReq {
 		results = append(results, convertToAppResultReq(apiResult))
 	}
 
+	var roles []gacha.RoleReq
+	for _, apiRole := range apiGachaReq.Role {
+		role := gacha.RoleReq{
+			ID:    apiRole.ID,
+			Point: apiRole.Point,
+		}
+		roles = append(roles, role)
+	}
+
 	return gacha.GachaReq{
 		ID:       apiGachaReq.ID,
 		ServerID: apiGachaReq.ServerID,
 		Panel:    panel,
 		Open:     open,
 		Result:   results,
+		Role:     roles,
 	}
 }
 
@@ -121,7 +155,11 @@ func convertToAppButtonReq(apiButtonReq ButtonReq) gacha.ButtonReq {
 // ====================================
 
 // ガチャのドメインをAPIレスポンスに変換します
-func ConvertToAPIGachaRes(domainGacha domainGacha.Gacha) GachaRes {
+func ConvertToAPIGachaRes(
+	s *discordgo.Session,
+	serverID string,
+	domainGacha domainGacha.Gacha,
+) (GachaRes, error) {
 	panel := convertDomainEmbedToAPIRes(domainGacha.Panel())
 	open := convertDomainEmbedToAPIRes(domainGacha.Open())
 
@@ -130,13 +168,48 @@ func ConvertToAPIGachaRes(domainGacha domainGacha.Gacha) GachaRes {
 		results = append(results, convertDomainResultToAPIRes(domainResult))
 	}
 
+	roles := make([]RoleWithPointRes, 0)
+	for _, domainRole := range domainGacha.Role() {
+		id := domainRole.ID().String()
+
+		// ロール名を取得
+		r, err := s.State.Role(domainGacha.ServerID().String(), id)
+		if err != nil {
+			return GachaRes{}, errors.NewError("ロール名の取得に失敗しました", err)
+		}
+
+		role := RoleWithPointRes{
+			ID:    id,
+			Name:  r.Name,
+			Point: domainRole.Point().Int(),
+		}
+		roles = append(roles, role)
+	}
+
+	// そのサーバーの全てのロールを取得
+	guildRoles, err := s.GuildRoles(serverID)
+	if err != nil {
+		return GachaRes{}, errors.NewError("ロールの取得に失敗しました", err)
+	}
+
+	allRoles := make([]RoleRes, 0)
+	for _, r := range guildRoles {
+		role := RoleRes{
+			ID:   r.ID,
+			Name: r.Name,
+		}
+		allRoles = append(allRoles, role)
+	}
+
 	return GachaRes{
 		ID:       domainGacha.ID().String(),
 		ServerID: domainGacha.ServerID().String(),
 		Panel:    panel,
 		Open:     open,
 		Result:   results,
-	}
+		Role:     roles,
+		AllRole:  allRoles,
+	}, nil
 }
 
 // Resultのドメインをレスポンスに変換します

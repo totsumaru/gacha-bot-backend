@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
+	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -46,10 +47,13 @@ func GetGacha(e *gin.Engine, db *gorm.DB) {
 		err := db.Transaction(func(tx *gorm.DB) error {
 			ga, err := gacha.FindByServerID(tx, serverID)
 			if err != nil {
-				return err
+				return errors.NewError("ガチャの取得に失敗しました", err)
 			}
 
-			res = ConvertToAPIGachaRes(ga)
+			res, err = ConvertToAPIGachaRes(discord.Session, serverID, ga)
+			if err != nil {
+				return errors.NewError("APIのレスポンスに変換できません", err)
+			}
 
 			return nil
 		})

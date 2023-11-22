@@ -35,7 +35,27 @@ func UpsertGacha(tx *gorm.DB, req GachaReq) (gacha.Gacha, error) {
 		return gacha.Gacha{}, errors.NewError("resultの生成に失敗しました", err)
 	}
 
-	g, err := gacha.RestoreGacha(i, sID, panel, open, result)
+	roles := make([]gacha.Role, 0)
+	for _, r := range req.Role {
+		roleID, err := domain.NewDiscordID(r.ID)
+		if err != nil {
+			return gacha.Gacha{}, errors.NewError("roleIDの生成に失敗しました", err)
+		}
+
+		point, err := domain.NewPoint(r.Point)
+		if err != nil {
+			return gacha.Gacha{}, errors.NewError("pointの生成に失敗しました", err)
+		}
+
+		role, err := gacha.NewRole(roleID, point)
+		if err != nil {
+			return gacha.Gacha{}, errors.NewError("roleの生成に失敗しました", err)
+		}
+
+		roles = append(roles, role)
+	}
+
+	g, err := gacha.RestoreGacha(i, sID, panel, open, result, roles)
 	if err != nil {
 		return gacha.Gacha{}, errors.NewError("ガチャの生成に失敗しました", err)
 	}

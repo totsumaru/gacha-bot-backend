@@ -15,6 +15,7 @@ type GachaReq struct {
 	Panel    EmbedReq
 	Open     EmbedReq
 	Result   []ResultReq
+	Role     []RoleReq
 }
 
 // 結果のリクエストです
@@ -41,6 +42,12 @@ type ButtonReq struct {
 	Style string
 }
 
+// ロールのリクエストです
+type RoleReq struct {
+	ID    string
+	Point int
+}
+
 // ========================================
 // 以下、app内で使用する共通処理です
 // ========================================
@@ -55,7 +62,7 @@ func createResult(req []ResultReq) ([]result.Result, error) {
 			return nil, errors.NewError("Embedの生成に失敗しました", err)
 		}
 
-		point, err := result.NewPoint(v.Point)
+		point, err := domain.NewPoint(v.Point)
 		if err != nil {
 			return nil, errors.NewError("ポイントの生成に失敗しました", err)
 		}

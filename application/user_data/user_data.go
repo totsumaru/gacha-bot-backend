@@ -47,7 +47,7 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) error {
 
 	newPoint := currentPoint + addPoint
 
-	p, err := user_data.NewPoint(newPoint)
+	p, err := domain.NewPoint(newPoint)
 	if err != nil {
 		return errors.NewError("ポイントを作成できません", err)
 	}
@@ -102,7 +102,7 @@ func IncrementCount(tx *gorm.DB, serverID, userID string) error {
 		currentCount = ud.Count()
 	}
 
-	p, err := user_data.NewPoint(currentPoint)
+	p, err := domain.NewPoint(currentPoint)
 	if err != nil {
 		return errors.NewError("ポイントを作成できません", err)
 	}

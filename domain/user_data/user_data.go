@@ -13,7 +13,7 @@ type UserData struct {
 	id       ID
 	serverID domain.DiscordID
 	userID   domain.DiscordID
-	point    Point
+	point    domain.Point
 	count    count.Count
 }
 
@@ -21,7 +21,7 @@ type UserData struct {
 func NewUserData(
 	serverID domain.DiscordID,
 	userID domain.DiscordID,
-	point Point,
+	point domain.Point,
 	count count.Count,
 ) (UserData, error) {
 	id, err := NewID(serverID, userID)
@@ -45,7 +45,7 @@ func NewUserData(
 }
 
 // ポイントを更新します
-func (p UserData) UpdatePoint(point Point) error {
+func (p UserData) UpdatePoint(point domain.Point) error {
 	p.point = point
 	if err := p.validate(); err != nil {
 		return errors.NewError("ポイントの更新に失敗しました", err)
@@ -80,7 +80,7 @@ func (p UserData) UserID() domain.DiscordID {
 }
 
 // ポイントを返します
-func (p UserData) Point() Point {
+func (p UserData) Point() domain.Point {
 	return p.point
 }
 
@@ -100,7 +100,7 @@ func (p UserData) MarshalJSON() ([]byte, error) {
 		ID       ID               `json:"id"`
 		ServerID domain.DiscordID `json:"server_id"`
 		UserID   domain.DiscordID `json:"user_id"`
-		Point    Point            `json:"point"`
+		Point    domain.Point     `json:"point"`
 		Count    count.Count      `json:"count"`
 	}{
 		ID:       p.id,
@@ -119,7 +119,7 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 		ID       ID               `json:"id"`
 		ServerID domain.DiscordID `json:"server_id"`
 		UserID   domain.DiscordID `json:"user_id"`
-		Point    Point            `json:"point"`
+		Point    domain.Point     `json:"point"`
 		Count    count.Count      `json:"count"`
 	}{}
 
