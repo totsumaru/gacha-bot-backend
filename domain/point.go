@@ -1,4 +1,4 @@
-package user_data
+package domain
 
 import (
 	"encoding/json"
@@ -6,39 +6,42 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
-// ポイントの合計です
+// ポイントです
 type Point struct {
 	value int
 }
 
-// ポイントの合計を作成します
+// ポイントを生成します
 func NewPoint(value int) (Point, error) {
-	p := Point{
-		value: value,
-	}
+	p := Point{value: value}
 
 	if err := p.validate(); err != nil {
-		return Point{}, errors.NewError("ポイントの合計の生成に失敗しました", err)
+		return Point{}, errors.NewError("ポイントが不正です", err)
 	}
 
 	return p, nil
 }
 
-// ポイントの合計を返します
+// ポイントを返します
 func (p Point) Int() int {
 	return p.value
 }
 
-// ポイントの合計を検証します
+// ポイントが存在しているか確認します
+func (p Point) IsZero() bool {
+	return p.value == 0
+}
+
+// ポイントを検証します
 func (p Point) validate() error {
 	if p.value < 0 {
-		return errors.NewError("ポイントの合計が不正です")
+		return errors.NewError("ポイントがマイナスの値です")
 	}
 
 	return nil
 }
 
-// ポイントの合計をJSONに変換します
+// ポイントをJSONに変換します
 func (p Point) MarshalJSON() ([]byte, error) {
 	data := struct {
 		Value int `json:"value"`
@@ -49,14 +52,14 @@ func (p Point) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
-// JSONからポイントの合計を作成します
+// ポイントをJSONから変換します
 func (p *Point) UnmarshalJSON(b []byte) error {
 	data := struct {
 		Value int `json:"value"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
-		return errors.NewError("ポイントの合計のJSONのパースに失敗しました", err)
+		return errors.NewError("JSONの変換に失敗しました", err)
 	}
 
 	p.value = data.Value

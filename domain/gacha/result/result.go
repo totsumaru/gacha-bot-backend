@@ -3,6 +3,7 @@ package result
 import (
 	"encoding/json"
 
+	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
@@ -10,14 +11,14 @@ import (
 // 結果の埋め込みです
 type Result struct {
 	embed       embed.Embed
-	point       Point
+	point       domain.Point
 	probability Probability
 }
 
 // 結果を生成します
 func NewResult(
 	embed embed.Embed,
-	point Point,
+	point domain.Point,
 	probability Probability,
 ) (Result, error) {
 	r := Result{
@@ -39,7 +40,7 @@ func (r Result) Embed() embed.Embed {
 }
 
 // ポイントを返します
-func (r Result) Point() Point {
+func (r Result) Point() domain.Point {
 	return r.point
 }
 
@@ -56,9 +57,9 @@ func (r Result) validate() error {
 // JSONに変換します
 func (r Result) MarshalJSON() ([]byte, error) {
 	data := struct {
-		Embed       embed.Embed `json:"embed"`
-		Point       Point       `json:"point"`
-		Probability Probability `json:"probability"`
+		Embed       embed.Embed  `json:"embed"`
+		Point       domain.Point `json:"point"`
+		Probability Probability  `json:"probability"`
 	}{
 		Embed:       r.embed,
 		Point:       r.point,
@@ -71,9 +72,9 @@ func (r Result) MarshalJSON() ([]byte, error) {
 // JSONから変換します
 func (r *Result) UnmarshalJSON(b []byte) error {
 	data := struct {
-		Embed       embed.Embed `json:"embed"`
-		Point       Point       `json:"point"`
-		Probability Probability `json:"probability"`
+		Embed       embed.Embed  `json:"embed"`
+		Point       domain.Point `json:"point"`
+		Probability Probability  `json:"probability"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {

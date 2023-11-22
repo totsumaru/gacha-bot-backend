@@ -16,6 +16,7 @@ type Gacha struct {
 	panel    embed.Embed
 	open     embed.Embed
 	result   []result.Result
+	role     []Role
 }
 
 // ガチャを生成します
@@ -24,6 +25,7 @@ func NewGacha(
 	panel embed.Embed,
 	open embed.Embed,
 	result []result.Result,
+	role []Role,
 ) (Gacha, error) {
 	id, err := domain.NewUUID()
 	if err != nil {
@@ -36,6 +38,7 @@ func NewGacha(
 		panel:    panel,
 		open:     open,
 		result:   result,
+		role:     role,
 	}
 
 	if err = g.validate(); err != nil {
@@ -52,6 +55,7 @@ func RestoreGacha(
 	panel embed.Embed,
 	open embed.Embed,
 	result []result.Result,
+	role []Role,
 ) (Gacha, error) {
 	g := Gacha{
 		id:       id,
@@ -59,6 +63,7 @@ func RestoreGacha(
 		panel:    panel,
 		open:     open,
 		result:   result,
+		role:     role,
 	}
 
 	if err := g.validate(); err != nil {
@@ -83,7 +88,7 @@ func (g Gacha) Panel() embed.Embed {
 	return g.panel
 }
 
-// オープニングを返します
+// オープンを返します
 func (g Gacha) Open() embed.Embed {
 	return g.open
 }
@@ -91,6 +96,11 @@ func (g Gacha) Open() embed.Embed {
 // 結果を返します
 func (g Gacha) Result() []result.Result {
 	return g.result
+}
+
+// ロールを返します
+func (g Gacha) Role() []Role {
+	return g.role
 }
 
 // ガチャを検証します
@@ -105,6 +115,16 @@ func (g Gacha) validate() error {
 		return errors.NewError("確率の合計が100％ではありません")
 	}
 
+	// ロールIDが重複していないか確認します
+	ids := map[string]bool{}
+	for _, r := range g.role {
+		if _, ok := ids[r.ID().String()]; ok {
+			return errors.NewError("ロールIDが重複しています")
+		} else {
+			ids[r.ID().String()] = true
+		}
+	}
+
 	return nil
 }
 
@@ -116,12 +136,14 @@ func (g Gacha) MarshalJSON() ([]byte, error) {
 		Panel    embed.Embed      `json:"panel"`
 		Open     embed.Embed      `json:"open"`
 		Result   []result.Result  `json:"result"`
+		Role     []Role           `json:"role"`
 	}{
 		ID:       g.id,
 		ServerID: g.serverID,
 		Panel:    g.panel,
 		Open:     g.open,
 		Result:   g.result,
+		Role:     g.role,
 	}
 
 	return json.Marshal(data)
@@ -135,6 +157,7 @@ func (g *Gacha) UnmarshalJSON(b []byte) error {
 		Panel    embed.Embed      `json:"panel"`
 		Open     embed.Embed      `json:"open"`
 		Result   []result.Result  `json:"result"`
+		Role     []Role           `json:"role"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -146,6 +169,7 @@ func (g *Gacha) UnmarshalJSON(b []byte) error {
 	g.panel = data.Panel
 	g.open = data.Open
 	g.result = data.Result
+	g.role = data.Role
 
 	return nil
 }

@@ -6,22 +6,24 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/user_data"
-	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
+	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
 
 // 結果メッセージを送信します
+//
+// 追加された後の最新のポイントを返します。
 func SendResult(
 	tx *gorm.DB,
 	s *discordgo.Session,
 	i *discordgo.InteractionCreate,
-	domainGacha gacha.Gacha,
-) error {
+	domainGacha domainGacha.Gacha,
+) (int, error) {
 	editFunc, err := SendInteractionWaitingMessage(s, i, true, true)
 	if err != nil {
-		return errors.NewError("Waitingメッセージが送信できません")
+		return 0, errors.NewError("Waitingメッセージが送信できません")
 	}
 
 	r := chooseProb(domainGacha.Result())
@@ -38,21 +40,20 @@ func SendResult(
 		Embeds: &[]*discordgo.MessageEmbed{embed},
 	}
 	if _, err = editFunc(i.Interaction, webhook); err != nil {
-		return errors.NewError("レスポンスを送信できません", err)
+		return 0, errors.NewError("レスポンスを送信できません", err)
 	}
 
 	// ポイントを追加
-	if err = user_data.AddPoint(
-		tx, i.GuildID, i.Member.User.ID, r.Point().Int(),
-	); err != nil {
-		return errors.NewError("ポイントを追加できません", err)
+	latestPoint, err := user_data.AddPoint(tx, i.GuildID, i.Member.User.ID, r.Point().Int())
+	if err != nil {
+		return 0, errors.NewError("ポイントを追加できません", err)
 	}
 	// カウントを追加
-	if err = user_data.IncrementCount(tx, i.GuildID, i.Member.User.ID); err != nil {
-		return errors.NewError("カウントを追加できません", err)
+	if err = user_data.IncrementCount(tx, i.GuildID, i.Member.User.ID, 1); err != nil {
+		return 0, errors.NewError("カウントを追加できません", err)
 	}
 
-	return nil
+	return latestPoint, nil
 }
 
 // resultを確率に従って1つ取得します

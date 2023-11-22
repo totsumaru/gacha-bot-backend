@@ -11,25 +11,27 @@ import (
 )
 
 // ポイントを追加します
-func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) error {
+//
+// 追加後のポイント(最新のポイント)を返します。
+func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) (int, error) {
 	sID, err := domain.NewDiscordID(serverID)
 	if err != nil {
-		return errors.NewError("サーバーIDの生成に失敗しました", err)
+		return 0, errors.NewError("サーバーIDの生成に失敗しました", err)
 	}
 
 	uID, err := domain.NewDiscordID(userID)
 	if err != nil {
-		return errors.NewError("ユーザーIDの生成に失敗しました", err)
+		return 0, errors.NewError("ユーザーIDの生成に失敗しました", err)
 	}
 
 	id, err := user_data.NewID(sID, uID)
 	if err != nil {
-		return errors.NewError("IDの生成に失敗しました", err)
+		return 0, errors.NewError("IDの生成に失敗しました", err)
 	}
 
 	gw, err := gatewayUserData.NewGateway(tx)
 	if err != nil {
-		return errors.NewError("ゲートウェイの生成に失敗しました", err)
+		return 0, errors.NewError("ゲートウェイの生成に失敗しました", err)
 	}
 
 	currentPoint := 0
@@ -38,7 +40,7 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) error {
 	ud, err := gw.FindByIDForUpdate(id)
 	if err != nil {
 		if !errors.IsNotFoundError(err) {
-			return errors.NewError("IDでユーザーデータを取得できません", err)
+			return 0, errors.NewError("IDでユーザーデータを取得できません", err)
 		}
 	} else {
 		currentPoint = ud.Point().Int()
@@ -47,28 +49,28 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) error {
 
 	newPoint := currentPoint + addPoint
 
-	p, err := user_data.NewPoint(newPoint)
+	p, err := domain.NewPoint(newPoint)
 	if err != nil {
-		return errors.NewError("ポイントを作成できません", err)
+		return 0, errors.NewError("ポイントを作成できません", err)
 	}
 
 	newUserData, err := user_data.NewUserData(sID, uID, p, lim)
 	if err != nil {
-		return errors.NewError("ユーザーデータを作成できません", err)
+		return 0, errors.NewError("ユーザーデータを作成できません", err)
 	}
 
 	if err = gw.Upsert(newUserData); err != nil {
-		return errors.NewError("ユーザーデータの更新に失敗しました", err)
+		return 0, errors.NewError("ユーザーデータの更新に失敗しました", err)
 	}
 
-	return nil
+	return newPoint, nil
 }
 
 // ガチャを引いたときに、カウントを+1します
 //
-// Todayの場合は、numを+1
+// Todayの場合は、numをcountValue分追加
 // 昨日以前の場合は、日付をTodayに変更し、numに1をセット
-func IncrementCount(tx *gorm.DB, serverID, userID string) error {
+func IncrementCount(tx *gorm.DB, serverID, userID string, countValue int) error {
 	sID, err := domain.NewDiscordID(serverID)
 	if err != nil {
 		return errors.NewError("サーバーIDの生成に失敗しました", err)
@@ -102,16 +104,16 @@ func IncrementCount(tx *gorm.DB, serverID, userID string) error {
 		currentCount = ud.Count()
 	}
 
-	p, err := user_data.NewPoint(currentPoint)
+	p, err := domain.NewPoint(currentPoint)
 	if err != nil {
 		return errors.NewError("ポイントを作成できません", err)
 	}
 
 	newCount := count.Count{}
-	// 日付が今日の日付と一致する場合は、numを+1
+	// 日付が今日の日付と一致する場合は、numをcountValue分追加
 	// 今日ではない場合(昨日以前)の場合は、日付を今日にして、numに1をセット
 	if currentCount.IsToday() {
-		newNum, err := count.NewNum(currentCount.Num().Int() + 1)
+		newNum, err := count.NewNum(currentCount.Num().Int() + countValue)
 		if err != nil {
 			return errors.NewError("回数を作成できません", err)
 		}
