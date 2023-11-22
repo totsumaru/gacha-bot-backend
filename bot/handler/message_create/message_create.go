@@ -93,5 +93,14 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
 			return
 		}
+	case "!gacha-num-reset":
+		if m.ChannelID != "998773327076274197" {
+			return
+		}
+
+		if err := ResetNum(s, m); err != nil {
+			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
+			return
+		}
 	}
 }

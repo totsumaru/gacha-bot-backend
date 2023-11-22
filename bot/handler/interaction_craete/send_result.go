@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	appGacha "github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/application/user_data"
 	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
@@ -14,15 +13,17 @@ import (
 )
 
 // 結果メッセージを送信します
+//
+// 追加された後の最新のポイントを返します。
 func SendResult(
 	tx *gorm.DB,
 	s *discordgo.Session,
 	i *discordgo.InteractionCreate,
 	domainGacha domainGacha.Gacha,
-) error {
+) (int, error) {
 	editFunc, err := SendInteractionWaitingMessage(s, i, true, true)
 	if err != nil {
-		return errors.NewError("Waitingメッセージが送信できません")
+		return 0, errors.NewError("Waitingメッセージが送信できません")
 	}
 
 	r := chooseProb(domainGacha.Result())
@@ -39,58 +40,20 @@ func SendResult(
 		Embeds: &[]*discordgo.MessageEmbed{embed},
 	}
 	if _, err = editFunc(i.Interaction, webhook); err != nil {
-		return errors.NewError("レスポンスを送信できません", err)
+		return 0, errors.NewError("レスポンスを送信できません", err)
 	}
 
 	// ポイントを追加
-	if err = user_data.AddPoint(
-		tx, i.GuildID, i.Member.User.ID, r.Point().Int(),
-	); err != nil {
-		return errors.NewError("ポイントを追加できません", err)
+	latestPoint, err := user_data.AddPoint(tx, i.GuildID, i.Member.User.ID, r.Point().Int())
+	if err != nil {
+		return 0, errors.NewError("ポイントを追加できません", err)
 	}
 	// カウントを追加
-	if err = user_data.IncrementCount(tx, i.GuildID, i.Member.User.ID); err != nil {
-		return errors.NewError("カウントを追加できません", err)
+	if err = user_data.IncrementCount(tx, i.GuildID, i.Member.User.ID, 1); err != nil {
+		return 0, errors.NewError("カウントを追加できません", err)
 	}
 
-	// ポイントがロール付与の条件を満たしていた場合は、ロールを付与
-	{
-		ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
-		if err != nil && !errors.IsNotFoundError(err) {
-			return errors.NewError("ユーザーデータを取得できません", err)
-		}
-
-		totalPoint := ud.Point().Int() + r.Point().Int()
-
-		// ガチャ情報を取得
-		ga, err := appGacha.FindByServerID(tx, i.GuildID)
-		if err != nil {
-			return errors.NewError("ガチャを取得できません", err)
-		}
-
-		// ロール付与の条件を満たしているか確認
-		for _, ro := range ga.Role() {
-			if totalPoint >= ro.Point().Int() {
-				// 指定のロールを持っているかを確認します
-				hasRole := false
-				for _, mr := range i.Member.Roles {
-					if mr == ro.ID().String() {
-						hasRole = true
-						break
-					}
-				}
-
-				// 指定のロールを持っていない場合は、ロールを付与します
-				if !hasRole {
-					if err = s.GuildMemberRoleAdd(i.GuildID, i.Member.User.ID, ro.ID().String()); err != nil {
-						return errors.NewError("ロールを付与できません", err)
-					}
-				}
-			}
-		}
-	}
-
-	return nil
+	return latestPoint, nil
 }
 
 // resultを確率に従って1つ取得します

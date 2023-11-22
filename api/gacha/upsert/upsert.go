@@ -48,7 +48,6 @@ func UpsertGacha(e *gin.Engine, db *gorm.DB) {
 			errors.HandleError(c, http.StatusBadRequest, "リクエストの解析に失敗しました", err)
 			return
 		}
-		fmt.Printf("gachaReq: %+v\n", gachaReq)
 
 		err := db.Transaction(func(tx *gorm.DB) error {
 			appReq := apiGacha.ConvertToAppGachaReq(gachaReq)

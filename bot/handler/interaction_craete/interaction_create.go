@@ -33,14 +33,53 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 				return
 			}
 		case button.ButtonKindToResult:
+			totalPoint := 0
 			err := bot.DB.Transaction(func(tx *gorm.DB) error {
+				// TODO: ForUpdateを使う
 				ga, err := gacha.FindByServerID(tx, i.GuildID)
 				if err != nil {
 					return errors.NewError("ガチャを取得できません", err)
 				}
 
-				if err = SendResult(tx, s, i, ga); err != nil {
+				totalPoint, err = SendResult(tx, s, i, ga)
+				if err != nil {
 					return errors.NewError("結果を送信できません", err)
+				}
+
+				return nil
+			})
+			if err != nil {
+				errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), i.GuildID)
+				return
+			}
+
+			// ポイントがロール付与の条件を満たしていた場合は、ロールを付与
+			err = bot.DB.Transaction(func(tx *gorm.DB) error {
+				// ガチャ情報を取得
+				ga, err := gacha.FindByServerID(tx, i.GuildID)
+				if err != nil {
+					return errors.NewError("ガチャを取得できません", err)
+				}
+
+				// ロール付与の条件を満たしているか確認
+				for _, ro := range ga.Role() {
+					if totalPoint >= ro.Point().Int() {
+						// 指定のロールを持っているかを確認します
+						hasRole := false
+						for _, mr := range i.Member.Roles {
+							if mr == ro.ID().String() {
+								hasRole = true
+								break
+							}
+						}
+
+						// 指定のロールを持っていない場合は、ロールを付与します
+						if !hasRole {
+							if err = s.GuildMemberRoleAdd(i.GuildID, i.Member.User.ID, ro.ID().String()); err != nil {
+								return errors.NewError("ロールを付与できません", err)
+							}
+						}
+					}
 				}
 
 				return nil
