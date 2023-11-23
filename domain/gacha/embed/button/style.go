@@ -2,6 +2,7 @@ package button
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
@@ -49,7 +50,9 @@ func (s Style) validate() error {
 	case ButtonStyleDanger:
 	case ButtonStyleLink:
 	default:
-		return errors.NewError("ボタンのスタイルが不正です")
+		return errors.NewError(
+			fmt.Sprintf("ボタンのスタイルが不正です value: %s", s.value),
+		)
 	}
 
 	return nil
