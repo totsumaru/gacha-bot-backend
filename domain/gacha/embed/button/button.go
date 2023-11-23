@@ -2,7 +2,6 @@ package button
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -10,11 +9,11 @@ import (
 
 // ボタンコンポーネントです
 type Button struct {
-	kind     Kind
-	label    Label
-	style    Style
-	url      domain.URL
-	isHidden bool // ボタンの表示/非表示
+	kind      Kind
+	label     Label
+	style     Style
+	url       domain.URL
+	isVisible bool // ボタンの表示/非表示
 }
 
 // ボタンを作成します
@@ -23,14 +22,14 @@ func NewButton(
 	label Label,
 	style Style,
 	url domain.URL,
-	isHidden bool,
+	isVisible bool,
 ) (Button, error) {
 	b := Button{
-		kind:     kind,
-		label:    label,
-		style:    style,
-		url:      url,
-		isHidden: isHidden,
+		kind:      kind,
+		label:     label,
+		style:     style,
+		url:       url,
+		isVisible: isVisible,
 	}
 
 	// ボタンのスタイルがLink以外の場合は、URLを空にする
@@ -66,16 +65,15 @@ func (b Button) URL() domain.URL {
 }
 
 // ボタンが非表示かどうかを返します
-func (b Button) IsHidden() bool {
-	return b.isHidden
+func (b Button) IsVisible() bool {
+	return b.isVisible
 }
 
 // 検証します
 func (b Button) validate() error {
-	fmt.Println("isHidden", b.isHidden, ": Style: ", b.Style().String())
 	switch b.Style().String() {
 	case ButtonStyleLink:
-		if !b.isHidden {
+		if b.isVisible {
 			if b.Label().IsEmpty() {
 				return errors.NewError("Linkボタンにはラベルが必須です")
 			}
@@ -95,17 +93,17 @@ func (b Button) validate() error {
 // MarshalJSON は Button 構造体を JSON に変換します。
 func (b Button) MarshalJSON() ([]byte, error) {
 	bb, err := json.Marshal(struct {
-		Kind     Kind       `json:"kind"`
-		Label    Label      `json:"label"`
-		Style    Style      `json:"style"`
-		URL      domain.URL `json:"url"`
-		IsHidden bool       `json:"is_hidden"`
+		Kind      Kind       `json:"kind"`
+		Label     Label      `json:"label"`
+		Style     Style      `json:"style"`
+		URL       domain.URL `json:"url"`
+		IsVisible bool       `json:"is_visible"`
 	}{
-		Kind:     b.kind,
-		Label:    b.label,
-		Style:    b.style,
-		URL:      b.url,
-		IsHidden: b.isHidden,
+		Kind:      b.kind,
+		Label:     b.label,
+		Style:     b.style,
+		URL:       b.url,
+		IsVisible: b.isVisible,
 	})
 
 	if err != nil {
@@ -118,11 +116,11 @@ func (b Button) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON は JSON から Button 構造体を復元します。
 func (b *Button) UnmarshalJSON(bytes []byte) error {
 	data := struct {
-		Kind     Kind       `json:"kind"`
-		Label    Label      `json:"label"`
-		Style    Style      `json:"style"`
-		URL      domain.URL `json:"url"`
-		IsHidden bool       `json:"is_hidden"`
+		Kind      Kind       `json:"kind"`
+		Label     Label      `json:"label"`
+		Style     Style      `json:"style"`
+		URL       domain.URL `json:"url"`
+		IsVisible bool       `json:"is_visible"`
 	}{}
 
 	if err := json.Unmarshal(bytes, &data); err != nil {
@@ -133,7 +131,7 @@ func (b *Button) UnmarshalJSON(bytes []byte) error {
 	b.label = data.Label
 	b.style = data.Style
 	b.url = data.URL
-	b.isHidden = data.IsHidden
+	b.isVisible = data.IsVisible
 
 	return nil
 }
