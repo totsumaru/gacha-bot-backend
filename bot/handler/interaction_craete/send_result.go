@@ -39,6 +39,26 @@ func SendResult(
 	webhook := &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{embed},
 	}
+
+	// ボタンを追加します
+	// MEMO: Linkに限定しています
+	components := make([]discordgo.MessageComponent, 0)
+	for _, btn := range r.Embed().Button() {
+		if !btn.IsHidden() {
+			components = append(components, discordgo.Button{
+				Label: btn.Label().String(),
+				Style: discordgo.LinkButton,
+				URL:   btn.URL().String(),
+			})
+		}
+	}
+	if len(components) > 0 {
+		actions := discordgo.ActionsRow{
+			Components: components,
+		}
+		webhook.Components = &[]discordgo.MessageComponent{actions}
+	}
+
 	if _, err = editFunc(i.Interaction, webhook); err != nil {
 		return 0, errors.NewError("レスポンスを送信できません", err)
 	}
