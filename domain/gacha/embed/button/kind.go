@@ -9,6 +9,7 @@ import (
 const (
 	ButtonKindToOpen   = "to_open"
 	ButtonKindToResult = "to_result"
+	ButtonKindNone     = "none" // linkなどのボタンの種類がない場合
 )
 
 // ボタンの種類です
@@ -42,6 +43,7 @@ func (k Kind) validate() error {
 	switch k.value {
 	case ButtonKindToOpen:
 	case ButtonKindToResult:
+	case ButtonKindNone:
 	default:
 		return errors.NewError("ボタンの種類が不正です", nil)
 	}

@@ -7,6 +7,8 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
+const URLMaxLength = 2000
+
 // URLです
 type URL struct {
 	value string
@@ -34,9 +36,15 @@ func (u URL) IsEmpty() bool {
 }
 
 // URLを検証します
+//
+// 空を許容します。
 func (u URL) validate() error {
 	if u.IsEmpty() {
 		return nil
+	}
+
+	if len(u.value) > URLMaxLength {
+		return errors.NewError("URLが長すぎます")
 	}
 
 	if !isValidURL(u.value) {

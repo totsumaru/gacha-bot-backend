@@ -35,9 +35,11 @@ func (l Label) IsEmpty() bool {
 }
 
 // ラベルを検証します
+//
+// 空を許容します。
 func (l Label) validate() error {
 	if l.IsEmpty() {
-		return errors.NewError("Labelが空です")
+		return nil
 	}
 
 	if len([]rune(l.value)) > LabelMaxLength {
