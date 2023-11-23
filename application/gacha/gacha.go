@@ -37,11 +37,11 @@ type EmbedReq struct {
 
 // ボタンのリクエストです
 type ButtonReq struct {
-	Kind     string
-	Label    string
-	Style    string
-	URL      string
-	IsHidden bool
+	Kind      string
+	Label     string
+	Style     string
+	URL       string
+	IsVisible bool
 }
 
 // ロールのリクエストです
@@ -134,7 +134,7 @@ func createEmbed(req EmbedReq) (embed.Embed, error) {
 			return embed.Embed{}, errors.NewError("URLの生成に失敗しました", err)
 		}
 
-		bb, err := button.NewButton(kind, label, style, url, v.IsHidden)
+		bb, err := button.NewButton(kind, label, style, url, v.IsVisible)
 		if err != nil {
 			return embed.Embed{}, errors.NewError("ボタンの生成に失敗しました", err)
 		}

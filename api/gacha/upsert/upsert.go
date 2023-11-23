@@ -8,6 +8,7 @@ import (
 	apiGacha "github.com/totsumaru/gacha-bot-backend/api/gacha"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
+	"github.com/totsumaru/gacha-bot-backend/lib/debug"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -48,6 +49,7 @@ func UpsertGacha(e *gin.Engine, db *gorm.DB) {
 			errors.HandleError(c, http.StatusBadRequest, "リクエストの解析に失敗しました", err)
 			return
 		}
+		debug.PrintJSON(gachaReq) // エラー検証のため、今だけ追加しておきます。今後削除OK。
 
 		err := db.Transaction(func(tx *gorm.DB) error {
 			appReq := apiGacha.ConvertToAppGachaReq(gachaReq)
