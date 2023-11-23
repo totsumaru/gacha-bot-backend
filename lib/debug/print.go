@@ -2,7 +2,6 @@ package debug
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 )
 
@@ -27,5 +26,5 @@ func PrintJSON(v interface{}) {
 	}
 
 	// コンソールに出力
-	fmt.Println(string(b))
+	log.Println(string(b))
 }
