@@ -69,9 +69,11 @@ type EmbedReq struct {
 
 // ボタンのリクエストです
 type ButtonReq struct {
-	Kind  string `json:"kind"`
-	Label string `json:"label"`
-	Style string `json:"style"`
+	Kind     string `json:"kind"`
+	Label    string `json:"label"`
+	Style    string `json:"style"`
+	URL      string `json:"url"`
+	IsHidden bool   `json:"is_hidden"`
 }
 
 // ロールのリクエストです
@@ -144,9 +146,11 @@ func convertToAppEmbedReq(apiEmbedReq EmbedReq) gacha.EmbedReq {
 // ボタンのリクエストをAppのリクエストに変換します
 func convertToAppButtonReq(apiButtonReq ButtonReq) gacha.ButtonReq {
 	return gacha.ButtonReq{
-		Kind:  apiButtonReq.Kind,
-		Label: apiButtonReq.Label,
-		Style: apiButtonReq.Style,
+		Kind:     apiButtonReq.Kind,
+		Label:    apiButtonReq.Label,
+		Style:    apiButtonReq.Style,
+		URL:      apiButtonReq.URL,
+		IsHidden: apiButtonReq.IsHidden,
 	}
 }
 
@@ -243,8 +247,10 @@ func convertDomainEmbedToAPIRes(domainEmbed embed.Embed) EmbedReq {
 // ボタンのドメインをレスポンスに変換します
 func convertDomainButtonToAPIRes(domainButton button.Button) ButtonReq {
 	return ButtonReq{
-		Kind:  domainButton.Kind().String(),
-		Label: domainButton.Label().String(),
-		Style: domainButton.Style().String(),
+		Kind:     domainButton.Kind().String(),
+		Label:    domainButton.Label().String(),
+		Style:    domainButton.Style().String(),
+		URL:      domainButton.URL().String(),
+		IsHidden: domainButton.IsHidden(),
 	}
 }
