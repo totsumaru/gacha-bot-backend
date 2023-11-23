@@ -44,7 +44,7 @@ func SendResult(
 	// MEMO: Linkに限定しています
 	components := make([]discordgo.MessageComponent, 0)
 	for _, btn := range r.Embed().Button() {
-		if !btn.IsVisible() {
+		if btn.IsVisible() {
 			components = append(components, discordgo.Button{
 				Label: btn.Label().String(),
 				Style: discordgo.LinkButton,
