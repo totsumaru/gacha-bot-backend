@@ -115,6 +115,28 @@ func (g Gateway) FindByIDForUpdate(id domain.DiscordID) (server.Server, error) {
 	return res, nil
 }
 
+// すべてのサーバーを取得します
+func (g Gateway) FindAll() ([]server.Server, error) {
+	var dbServers []gateway.Server
+	var servers []server.Server
+
+	// データベースからすべてのサーバーレコードを取得
+	if err := g.tx.Find(&dbServers).Error; err != nil {
+		return nil, errors.NewError("サーバーを取得できません", err)
+	}
+
+	// 取得したデータをドメインモデルに変換
+	for _, dbServer := range dbServers {
+		s, err := castToDomainModel(dbServer)
+		if err != nil {
+			return nil, errors.NewError("DBをドメインモデルに変換できません", err)
+		}
+		servers = append(servers, s)
+	}
+
+	return servers, nil
+}
+
 // 削除します
 func (g Gateway) Delete(id domain.DiscordID) error {
 	// IDに基づいてレコードを削除
