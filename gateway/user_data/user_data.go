@@ -149,10 +149,9 @@ func (g Gateway) FindTop100ByServerID(serverID domain.DiscordID) ([]user_data.Us
 	var dbUserDatas []gateway.UserData
 	var userDatas []user_data.UserData
 
-	// id のプレフィックスが server_id と一致するレコードを検索し、ポイントで降順にソートして上位100件を取得
-	serverIDPrefix := serverID.String() + "%" // "%" はワイルドカードとして機能します
+	// server_id が完全一致するレコードを検索し、ポイントで降順にソートして上位100件を取得
 	if err := g.tx.Where(
-		"id LIKE ?", serverIDPrefix,
+		"server_id = ?", serverID.String(),
 	).Order("point DESC").Limit(100).Find(&dbUserDatas).Error; err != nil {
 		return nil, errors.NewError("データの取得に失敗しました", err)
 	}
