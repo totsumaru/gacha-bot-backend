@@ -101,6 +101,32 @@ func (g Gateway) FindByIDForUpdate(id user_data.ID) (user_data.UserData, error) 
 	return res, nil
 }
 
+// FindAllForUpdate は、FOR UPDATE ロックを使用してすべてのユーザーデータレコードを取得します。
+func (g Gateway) FindAllForUpdate() ([]user_data.UserData, error) {
+	var dbUserDatas []gateway.UserData
+	var userDatas []user_data.UserData
+
+	// FOR UPDATE ロックを使用してすべてのレコードを取得
+	if err := g.tx.Set("gorm:query_option", "FOR UPDATE").Find(&dbUserDatas).Error; err != nil {
+		if defaultError.Is(err, gorm.ErrRecordNotFound) {
+			// レコードが見つからない場合は、エラーなしで空のスライスを返します
+			return userDatas, nil
+		}
+		return nil, errors.NewError("レコードを取得できません", err)
+	}
+
+	// DBデータをドメインモデルに変換
+	for _, dbUserData := range dbUserDatas {
+		userData, err := castToDomainModel(dbUserData)
+		if err != nil {
+			return nil, errors.NewError("DBをドメインモデルに変換できません", err)
+		}
+		userDatas = append(userDatas, userData)
+	}
+
+	return userDatas, nil
+}
+
 // 削除します
 func (g Gateway) Delete(id user_data.ID) error {
 	// IDに基づいてレコードを削除
