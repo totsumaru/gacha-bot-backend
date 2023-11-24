@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	defaultError "errors"
 
+	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/user_data"
 	"github.com/totsumaru/gacha-bot-backend/gateway"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -116,6 +117,32 @@ func (g Gateway) Delete(id user_data.ID) error {
 	return nil
 }
 
+// FindTop100ByServerID は、指定されたサーバーIDに一致するユーザーデータの中から、
+// ポイントの上位100個のレコードを取得します。
+func (g Gateway) FindTop100ByServerID(serverID domain.DiscordID) ([]user_data.UserData, error) {
+	var dbUserDatas []gateway.UserData
+	var userDatas []user_data.UserData
+
+	// id のプレフィックスが server_id と一致するレコードを検索し、ポイントで降順にソートして上位100件を取得
+	serverIDPrefix := serverID.String() + "%" // "%" はワイルドカードとして機能します
+	if err := g.tx.Where(
+		"id LIKE ?", serverIDPrefix,
+	).Order("point DESC").Limit(100).Find(&dbUserDatas).Error; err != nil {
+		return nil, errors.NewError("データの取得に失敗しました", err)
+	}
+
+	// 取得したDBデータをドメインモデルに変換
+	for _, dbUserData := range dbUserDatas {
+		userData, err := castToDomainModel(dbUserData)
+		if err != nil {
+			return nil, errors.NewError("データの変換に失敗しました", err)
+		}
+		userDatas = append(userDatas, userData)
+	}
+
+	return userDatas, nil
+}
+
 // =============
 // private
 // =============
@@ -131,6 +158,8 @@ func castToDBStruct(userData user_data.UserData) (gateway.UserData, error) {
 
 	dbUserData.ID = userData.ID().String()
 	dbUserData.Data = b
+	dbUserData.ServerID = userData.ServerID().String()
+	dbUserData.Point = userData.Point().Int()
 
 	return dbUserData, nil
 }

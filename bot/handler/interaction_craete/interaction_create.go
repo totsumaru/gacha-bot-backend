@@ -3,7 +3,7 @@ package interaction_craete
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
-	"github.com/totsumaru/gacha-bot-backend/application/user_data"
+	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/embed/button"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -90,7 +90,7 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 			}
 		case "check_point":
 			err := bot.DB.Transaction(func(tx *gorm.DB) error {
-				ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
+				ud, err := appUserData.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
 				if err != nil && !errors.IsNotFoundError(err) {
 					return errors.NewError("ユーザーデータを取得できません", err)
 				}

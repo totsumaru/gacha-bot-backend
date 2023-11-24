@@ -2,20 +2,20 @@ package message_create
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/totsumaru/gacha-bot-backend/application/user_data"
+	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 )
 
 // 回数をリセットします
 func ResetNum(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	ud, err := user_data.FindByServerIDAndUserIDForUpdate(bot.DB, m.GuildID, m.Author.ID)
+	ud, err := appUserData.FindByServerIDAndUserIDForUpdate(bot.DB, m.GuildID, m.Author.ID)
 	if err != nil {
 		return errors.NewError("ユーザーデータの取得に失敗しました", err)
 	}
 
 	// 現在のカウント分をマイナスします
-	if err = user_data.IncrementCount(
+	if err = appUserData.IncrementCount(
 		bot.DB,
 		m.GuildID,
 		m.Author.ID,
