@@ -14,10 +14,10 @@ import (
 
 // レスポンスのユーザーデータです
 type ResUserData struct {
-	UserName  string
-	AvatarURL string
-	Point     int
-	Rank      int
+	UserName  string `json:"user_name"`
+	AvatarURL string `json:"avatar_url"`
+	Point     int    `json:"point"`
+	Rank      int    `json:"rank"`
 }
 
 // ランキングを取得します
