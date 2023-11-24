@@ -2,7 +2,7 @@ package interaction_craete
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/totsumaru/gacha-bot-backend/application/user_data"
+	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/lib/color"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -22,7 +22,7 @@ func SendOpen(
 	}
 
 	// 現在のカウントを取得する
-	ud, err := user_data.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
+	ud, err := appUserData.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
 	if err != nil && !errors.IsNotFoundError(err) {
 		return errors.NewError("ユーザーデータを取得できません", err)
 	}

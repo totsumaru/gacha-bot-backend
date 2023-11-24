@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/totsumaru/gacha-bot-backend/application/user_data"
+	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -64,12 +64,12 @@ func SendResult(
 	}
 
 	// ポイントを追加
-	latestPoint, err := user_data.AddPoint(tx, i.GuildID, i.Member.User.ID, r.Point().Int())
+	latestPoint, err := appUserData.AddPoint(tx, i.GuildID, i.Member.User.ID, r.Point().Int())
 	if err != nil {
 		return 0, errors.NewError("ポイントを追加できません", err)
 	}
 	// カウントを追加
-	if err = user_data.IncrementCount(tx, i.GuildID, i.Member.User.ID, 1); err != nil {
+	if err = appUserData.IncrementCount(tx, i.GuildID, i.Member.User.ID, 1); err != nil {
 		return 0, errors.NewError("カウントを追加できません", err)
 	}
 

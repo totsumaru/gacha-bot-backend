@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/totsumaru/gacha-bot-backend/api/checkout"
 	"github.com/totsumaru/gacha-bot-backend/api/gacha"
+	"github.com/totsumaru/gacha-bot-backend/api/gacha/ranking"
 	"github.com/totsumaru/gacha-bot-backend/api/gacha/upsert"
 	"github.com/totsumaru/gacha-bot-backend/api/images"
 	"github.com/totsumaru/gacha-bot-backend/api/portal"
@@ -22,6 +23,7 @@ func RegisterRouter(e *gin.Engine, db *gorm.DB) {
 	images.UploadImages(e)
 	gacha.GetGacha(e, db)
 	server.GetServer(e, db)
+	ranking.GetRanking(e, db)
 }
 
 // ルートです
