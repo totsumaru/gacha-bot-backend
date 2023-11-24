@@ -158,6 +158,8 @@ func castToDBStruct(userData user_data.UserData) (gateway.UserData, error) {
 
 	dbUserData.ID = userData.ID().String()
 	dbUserData.Data = b
+	dbUserData.ServerID = userData.ServerID().String()
+	dbUserData.Point = userData.Point().Int()
 
 	return dbUserData, nil
 }
