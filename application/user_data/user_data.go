@@ -174,6 +174,29 @@ func FindByServerIDAndUserID(tx *gorm.DB, serverID, userID string) (user_data.Us
 	return s, nil
 }
 
+// 全てのレコードを取得し、DBのカラムに値を設定します。
+//
+// 一時的なスクリプトのため、ユーザーは使用しません。
+func UpsertAll(tx *gorm.DB) error {
+	gw, err := gatewayUserData.NewGateway(tx)
+	if err != nil {
+		return errors.NewError("ゲートウェイの生成に失敗しました", err)
+	}
+
+	userDatas, err := gw.FindAllForUpdate()
+	if err != nil {
+		return errors.NewError("全てのユーザーデータを取得できません", err)
+	}
+
+	for _, ud := range userDatas {
+		if err = gw.Upsert(ud); err != nil {
+			return errors.NewError("ユーザーデータの更新に失敗しました", err)
+		}
+	}
+
+	return nil
+}
+
 // そのサーバーで、ポイントが上位100位のユーザーデータを取得します
 func FindTop100ByServerID(tx *gorm.DB, serverID string) ([]user_data.UserData, error) {
 	sID, err := domain.NewDiscordID(serverID)
