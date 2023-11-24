@@ -7,7 +7,6 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/totsumaru/gacha-bot-backend/application/gacha"
 	"github.com/totsumaru/gacha-bot-backend/application/server"
-	"github.com/totsumaru/gacha-bot-backend/application/user_data"
 	"github.com/totsumaru/gacha-bot-backend/bot"
 	"github.com/totsumaru/gacha-bot-backend/lib/auth"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
@@ -103,25 +102,13 @@ func MessageCreateHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
 			return
 		}
-	case "!userdata-upsert":
-		if m.ChannelID != "998773327076274197" {
-			return
-		}
-
-		err := bot.DB.Transaction(func(tx *gorm.DB) error {
-			if err := user_data.UpsertAll(tx); err != nil {
-				return errors.NewError("ユーザーデータの更新に失敗しました", err)
-			}
-
-			_, err := s.ChannelMessageSend(m.ChannelID, "ユーザーデータの更新に成功しました")
-			if err != nil {
-				return errors.NewError("メッセージの送信に失敗しました", err)
-			}
-
-			return nil
-		})
-		if err != nil {
-			errors.SendErrMsg(s, errors.NewError("エラーが発生しました", err), m.GuildID)
+	case "!gacha-ranking":
+		url := os.Getenv("FRONTEND_URL") + "/server/" + m.GuildID + "/ranking"
+		if _, err := s.ChannelMessageSend(
+			m.ChannelID,
+			fmt.Sprintf("ランキングはこちら\n%s", url),
+		); err != nil {
+			errors.SendErrMsg(s, errors.NewError("メッセージの送信に失敗しました", err), m.GuildID)
 			return
 		}
 	}
