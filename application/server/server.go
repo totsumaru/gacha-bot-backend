@@ -153,3 +153,18 @@ func FindByID(tx *gorm.DB, id string) (server.Server, error) {
 
 	return s, nil
 }
+
+// 全てのサーバーを取得します
+func FindAll(tx *gorm.DB) ([]server.Server, error) {
+	gw, err := gatewayServer.NewGateway(tx)
+	if err != nil {
+		return nil, errors.NewError("ゲートウェイの生成に失敗しました", err)
+	}
+
+	s, err := gw.FindAll()
+	if err != nil {
+		return nil, errors.NewError("サーバーを取得できません", err)
+	}
+
+	return s, nil
+}
