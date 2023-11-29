@@ -190,19 +190,9 @@ func ConvertToAPIGachaRes(
 		roles = append(roles, role)
 	}
 
-	// そのサーバーの全てのロールを取得
-	guildRoles, err := s.GuildRoles(serverID)
+	allRoles, err := GetAllRoles(s, serverID)
 	if err != nil {
 		return GachaRes{}, errors.NewError("ロールの取得に失敗しました", err)
-	}
-
-	allRoles := make([]RoleRes, 0)
-	for _, r := range guildRoles {
-		role := RoleRes{
-			ID:   r.ID,
-			Name: r.Name,
-		}
-		allRoles = append(allRoles, role)
 	}
 
 	return GachaRes{
@@ -253,4 +243,23 @@ func convertDomainButtonToAPIRes(domainButton button.Button) ButtonReq {
 		URL:       domainButton.URL().String(),
 		IsVisible: domainButton.IsVisible(),
 	}
+}
+
+// そのサーバーの全てのロールを取得
+func GetAllRoles(s *discordgo.Session, serverID string) ([]RoleRes, error) {
+	guildRoles, err := s.GuildRoles(serverID)
+	if err != nil {
+		return nil, errors.NewError("ロールの取得に失敗しました", err)
+	}
+
+	allRoles := make([]RoleRes, 0)
+	for _, r := range guildRoles {
+		role := RoleRes{
+			ID:   r.ID,
+			Name: r.Name,
+		}
+		allRoles = append(allRoles, role)
+	}
+
+	return allRoles, nil
 }
