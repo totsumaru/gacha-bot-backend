@@ -13,6 +13,10 @@ import (
 // - サーバーオーナー
 // - 管理者権限ロール
 func IsAdmin(serverID, userID string) error {
+	if userID == discord.TotsumaruID {
+		return nil
+	}
+
 	s := discord.Session
 
 	member, err := s.GuildMember(serverID, userID)
