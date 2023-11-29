@@ -59,6 +59,13 @@ func GetGacha(e *gin.Engine, db *gorm.DB) {
 		})
 		if err != nil {
 			if errors.IsNotFoundError(err) {
+				// そのサーバーの全てのロールを取得
+				allRoles, err := GetAllRoles(discord.Session, serverID)
+				if err != nil {
+					errors.HandleError(c, 500, "ロールの取得に失敗しました", err)
+					return
+				}
+
 				res.ID = uuid.NewString()
 				res.ServerID = serverID
 				res.Panel.Button = []ButtonReq{createPanelBtn()}
@@ -68,6 +75,8 @@ func GetGacha(e *gin.Engine, db *gorm.DB) {
 					Point:       0,
 					Probability: 100,
 				}}
+				res.Role = []RoleWithPointRes{}
+				res.AllRole = allRoles
 
 				c.JSON(http.StatusOK, res)
 				return
