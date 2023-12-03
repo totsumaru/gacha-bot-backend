@@ -174,16 +174,24 @@ func ConvertToAPIGachaRes(
 
 	roles := make([]RoleWithPointRes, 0)
 	for _, domainRole := range domainGacha.Role() {
-		id := domainRole.ID().String()
+		roleID := domainRole.ID().String()
 
 		// ロール名を取得
-		r, err := s.State.Role(domainGacha.ServerID().String(), id)
+		r, err := s.State.Role(domainGacha.ServerID().String(), roleID)
 		if err != nil {
-			return GachaRes{}, errors.NewError("ロール名の取得に失敗しました", err)
+			// ロールが削除されている可能性があるため、
+			// ロールが取得できない場合はエラーではなくエラーの値を返します。
+			role := RoleWithPointRes{
+				ID:    roleID,
+				Name:  "不明なロール",
+				Point: domainRole.Point().Int(),
+			}
+			roles = append(roles, role)
+			continue
 		}
 
 		role := RoleWithPointRes{
-			ID:    id,
+			ID:    roleID,
 			Name:  r.Name,
 			Point: domainRole.Point().Int(),
 		}

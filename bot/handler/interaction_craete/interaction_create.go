@@ -75,9 +75,8 @@ func InteractionCreateHandler(s *discordgo.Session, i *discordgo.InteractionCrea
 
 						// 指定のロールを持っていない場合は、ロールを付与します
 						if !hasRole {
-							if err = s.GuildMemberRoleAdd(i.GuildID, i.Member.User.ID, ro.ID().String()); err != nil {
-								return errors.NewError("ロールを付与できません", err)
-							}
+							// ロールが削除されている可能性があるため、エラーが発生しても無視します。
+							_ = s.GuildMemberRoleAdd(i.GuildID, i.Member.User.ID, ro.ID().String())
 						}
 					}
 				}
