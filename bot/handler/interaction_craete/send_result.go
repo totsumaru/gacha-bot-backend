@@ -8,6 +8,7 @@ import (
 	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	domainGacha "github.com/totsumaru/gacha-bot-backend/domain/gacha"
 	"github.com/totsumaru/gacha-bot-backend/domain/gacha/result"
+	"github.com/totsumaru/gacha-bot-backend/lib/color"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -24,6 +25,27 @@ func SendResult(
 	editFunc, err := SendInteractionWaitingMessage(s, i, true, true)
 	if err != nil {
 		return 0, errors.NewError("Waitingメッセージが送信できません")
+	}
+
+	// 現在のカウントを取得する
+	ud, err := appUserData.FindByServerIDAndUserID(tx, i.GuildID, i.Member.User.ID)
+	if err != nil && !errors.IsNotFoundError(err) {
+		return 0, errors.NewError("ユーザーデータを取得できません", err)
+	}
+	// カウントが今日かつ、1回以上の場合は、エラーメッセージを送信する
+	if ud.Count().IsToday() && ud.Count().Num().Int() > 0 {
+		embed := &discordgo.MessageEmbed{
+			Description: "1日の上限回数に達しています。\n明日になってからもう一度お試しください。",
+			Color:       color.Red,
+		}
+
+		webhook := &discordgo.WebhookEdit{
+			Embeds: &[]*discordgo.MessageEmbed{embed},
+		}
+		if _, err = editFunc(i.Interaction, webhook); err != nil {
+			return 0, errors.NewError("レスポンスを送信できません", err)
+		}
+		return 0, nil
 	}
 
 	r := chooseProb(domainGacha.Result())
