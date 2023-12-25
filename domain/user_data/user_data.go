@@ -51,9 +51,9 @@ func NewUserData(
 }
 
 // ポイントを更新します
-func (p UserData) UpdatePoint(point domain.Point) error {
-	p.point = point
-	if err := p.validate(); err != nil {
+func (u *UserData) UpdatePoint(point domain.Point) error {
+	u.point = point
+	if err := u.validate(); err != nil {
 		return errors.NewError("ポイントの更新に失敗しました", err)
 	}
 
@@ -61,57 +61,77 @@ func (p UserData) UpdatePoint(point domain.Point) error {
 }
 
 // 1日の上限回数を更新します
-func (p UserData) UpdateCount(count count.Count) error {
-	p.count = count
-	if err := p.validate(); err != nil {
+func (u *UserData) UpdateCount(count count.Count) error {
+	u.count = count
+	if err := u.validate(); err != nil {
 		return errors.NewError("1日の上限回数の更新に失敗しました", err)
 	}
 
 	return nil
 }
 
+// ユーザー名を更新します
+func (u *UserData) UpdateUserName(userName UserName) error {
+	u.userName = userName
+	if err := u.validate(); err != nil {
+		return errors.NewError("ユーザー名の更新に失敗しました", err)
+	}
+
+	return nil
+}
+
+// アイコンURLを更新します
+func (u *UserData) UpdateIconURL(iconURL IconURL) error {
+	u.iconURL = iconURL
+	if err := u.validate(); err != nil {
+		return errors.NewError("アイコンURLの更新に失敗しました", err)
+	}
+
+	return nil
+}
+
 // IDを返します
-func (p UserData) ID() ID {
-	return p.id
+func (u UserData) ID() ID {
+	return u.id
 }
 
 // サーバーIDを返します
-func (p UserData) ServerID() domain.DiscordID {
-	return p.serverID
+func (u UserData) ServerID() domain.DiscordID {
+	return u.serverID
 }
 
 // ユーザーIDを返します
-func (p UserData) UserID() domain.DiscordID {
-	return p.userID
+func (u UserData) UserID() domain.DiscordID {
+	return u.userID
 }
 
 // ポイントを返します
-func (p UserData) Point() domain.Point {
-	return p.point
+func (u UserData) Point() domain.Point {
+	return u.point
 }
 
 // 1日の上限回数を返します
-func (p UserData) Count() count.Count {
-	return p.count
+func (u UserData) Count() count.Count {
+	return u.count
 }
 
 // ユーザー名を返します
-func (p UserData) UserName() UserName {
-	return p.userName
+func (u UserData) UserName() UserName {
+	return u.userName
 }
 
 // アイコンURLを返します
-func (p UserData) IconURL() IconURL {
-	return p.iconURL
+func (u UserData) IconURL() IconURL {
+	return u.iconURL
 }
 
 // 検証します
-func (p UserData) validate() error {
+func (u UserData) validate() error {
 	return nil
 }
 
 // ユーザーデータをJSONに変換します
-func (p UserData) MarshalJSON() ([]byte, error) {
+func (u UserData) MarshalJSON() ([]byte, error) {
 	data := struct {
 		ID       ID               `json:"id"`
 		ServerID domain.DiscordID `json:"server_id"`
@@ -121,20 +141,20 @@ func (p UserData) MarshalJSON() ([]byte, error) {
 		UserName UserName         `json:"user_name"`
 		IconURL  IconURL          `json:"icon_url"`
 	}{
-		ID:       p.id,
-		ServerID: p.serverID,
-		UserID:   p.userID,
-		Point:    p.point,
-		Count:    p.count,
-		UserName: p.userName,
-		IconURL:  p.iconURL,
+		ID:       u.id,
+		ServerID: u.serverID,
+		UserID:   u.userID,
+		Point:    u.point,
+		Count:    u.count,
+		UserName: u.userName,
+		IconURL:  u.iconURL,
 	}
 
 	return json.Marshal(data)
 }
 
 // JSONからユーザーデータを作成します
-func (p *UserData) UnmarshalJSON(b []byte) error {
+func (u *UserData) UnmarshalJSON(b []byte) error {
 	data := struct {
 		ID       ID               `json:"id"`
 		ServerID domain.DiscordID `json:"server_id"`
@@ -149,13 +169,13 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 		return errors.NewError("ユーザーデータのJSONのパースに失敗しました", err)
 	}
 
-	p.id = data.ID
-	p.serverID = data.ServerID
-	p.userID = data.UserID
-	p.point = data.Point
-	p.count = data.Count
-	p.userName = data.UserName
-	p.iconURL = data.IconURL
+	u.id = data.ID
+	u.serverID = data.ServerID
+	u.userID = data.UserID
+	u.point = data.Point
+	u.count = data.Count
+	u.userName = data.UserName
+	u.iconURL = data.IconURL
 
 	return nil
 }

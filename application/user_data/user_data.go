@@ -5,6 +5,7 @@ import (
 	"github.com/totsumaru/gacha-bot-backend/domain/user_data"
 	"github.com/totsumaru/gacha-bot-backend/domain/user_data/count"
 	gatewayUserData "github.com/totsumaru/gacha-bot-backend/gateway/user_data"
+	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"github.com/totsumaru/gacha-bot-backend/lib/now"
 	"gorm.io/gorm"
@@ -200,12 +201,50 @@ func FindTop100ByServerID(tx *gorm.DB, serverID string) ([]user_data.UserData, e
 		return nil, errors.NewError("ゲートウェイの生成に失敗しました", err)
 	}
 
-	ss, err := gw.FindTop100ByServerID(sID)
+	userDatas, err := gw.FindTop100ByServerID(sID)
 	if err != nil {
 		return nil, errors.NewError("サーバーIDでユーザーデータを取得できません", err)
 	}
 
-	return ss, nil
+	// ユーザー名, アイコンURLが入っていない場合は取得して追加する
+	res := make([]user_data.UserData, 0)
+	for _, ud := range userDatas {
+		if ud.UserName().IsEmpty() || ud.IconURL().IsEmpty() {
+			s := discord.Session
+			u, err := s.User(ud.UserID().String())
+			if err != nil {
+				return nil, errors.NewError("ユーザー名を取得できません", err)
+			}
+
+			un, err := user_data.NewUserName(u.Username)
+			if err != nil {
+				return nil, errors.NewError("ユーザー名を作成できません", err)
+			}
+
+			iu, err := user_data.NewIconURL(u.AvatarURL(""))
+			if err != nil {
+				return nil, errors.NewError("アイコンURLを作成できません", err)
+			}
+
+			if err = ud.UpdateUserName(un); err != nil {
+				return nil, errors.NewError("ユーザー名の更新に失敗しました", err)
+			}
+
+			if err = ud.UpdateIconURL(iu); err != nil {
+				return nil, errors.NewError("アイコンURLの更新に失敗しました", err)
+			}
+
+			if err = gw.Upsert(ud); err != nil {
+				return nil, errors.NewError("ユーザーデータの更新に失敗しました", err)
+			}
+
+			res = append(res, ud)
+		} else {
+			res = append(res, ud)
+		}
+	}
+
+	return res, nil
 }
 
 // FOR UPDATEでサーバーIDとユーザーIDでユーザーデータを取得します
