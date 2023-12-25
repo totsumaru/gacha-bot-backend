@@ -150,9 +150,8 @@ func (g Gateway) FindTop100ByServerID(serverID domain.DiscordID) ([]user_data.Us
 	var userDatas []user_data.UserData
 
 	// server_id が完全一致するレコードを検索し、ポイントで降順にソートして上位100件を取得
-	if err := g.tx.Where(
-		"server_id = ?", serverID.String(),
-	).Order("point DESC").Limit(100).Find(&dbUserDatas).Error; err != nil {
+	sql := `SELECT * FROM user_data WHERE server_id = ? ORDER BY point DESC LIMIT 100`
+	if err := g.tx.Raw(sql, serverID.String()).Scan(&dbUserDatas).Error; err != nil {
 		return nil, errors.NewError("データの取得に失敗しました", err)
 	}
 
