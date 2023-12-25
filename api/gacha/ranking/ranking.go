@@ -1,10 +1,7 @@
 package ranking
 
 import (
-	"log"
 	"net/http"
-	"sort"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
@@ -30,23 +27,17 @@ func GetRanking(e *gin.Engine, db *gorm.DB) {
 	e.GET("/api/gacha/ranking", func(c *gin.Context) {
 		serverID := c.Query("server_id")
 
-		log.Println("APIを受け付けました: ", serverID, ", ", time.Now())
-
 		res := make([]ResUserData, 0)
 		err := db.Transaction(func(tx *gorm.DB) error {
-			log.Println("ランキング取得前: ", serverID, ", ", time.Now())
 			userDatas, err := appUserData.FindTop100ByServerID(tx, serverID)
 			if err != nil {
 				return errors.NewError("ガチャの取得に失敗しました", err)
 			}
-			log.Println("ランキング取得後: ", serverID, ", ", time.Now())
 
 			res, err = ConvertToAPIGachaRes(discord.Session, userDatas)
 			if err != nil {
 				return errors.NewError("APIのレスポンスに変換できません", err)
 			}
-
-			log.Println("レスポンス作成後: ", serverID, ", ", time.Now())
 
 			return nil
 		})
@@ -61,63 +52,24 @@ func GetRanking(e *gin.Engine, db *gorm.DB) {
 
 // ドメインのユーザーデータをAPIのレスポンスに変換します
 func ConvertToAPIGachaRes(s *discordgo.Session, datas []domainUserData.UserData) ([]ResUserData, error) {
-	//res := make([]ResUserData, 0)
-	//
-	//for i, userData := range datas {
-	//	userID := userData.UserID().String()
-	//	u, err := s.User(userID)
-	//	if err != nil {
-	//		return nil, errors.NewError("ユーザー名を取得できません", err)
-	//	}
-	//
-	//	resUserData := ResUserData{
-	//		UserName:  u.Username,
-	//		AvatarURL: u.AvatarURL(""),
-	//		Point:     userData.Point().Int(),
-	//		Rank:      i + 1,
-	//	}
-	//
-	//	res = append(res, resUserData)
-	//}
-	type result struct {
-		data ResUserData
-		err  error
-	}
+	res := make([]ResUserData, 0)
 
-	results := make(chan result, len(datas))
 	for i, userData := range datas {
-		go func(i int, userData domainUserData.UserData) {
-			userID := userData.UserID().String()
-			u, err := s.User(userID)
-			if err != nil {
-				results <- result{err: errors.NewError("ユーザー名を取得できません", err)}
-				return
-			}
-
-			resUserData := ResUserData{
-				UserName:  u.Username,
-				AvatarURL: u.AvatarURL(""),
-				Point:     userData.Point().Int(),
-				Rank:      i + 1,
-			}
-
-			results <- result{data: resUserData}
-		}(i, userData)
-	}
-
-	res := make([]ResUserData, 0, len(datas))
-	for range datas {
-		result := <-results
-		if result.err != nil {
-			return nil, result.err
+		userID := userData.UserID().String()
+		u, err := s.User(userID)
+		if err != nil {
+			return nil, errors.NewError("ユーザー名を取得できません", err)
 		}
-		res = append(res, result.data)
-	}
 
-	// ポイントで降順にソート
-	sort.Slice(res, func(i, j int) bool {
-		return res[i].Point > res[j].Point
-	})
+		resUserData := ResUserData{
+			UserName:  u.Username,
+			AvatarURL: u.AvatarURL(""),
+			Point:     userData.Point().Int(),
+			Rank:      i + 1,
+		}
+
+		res = append(res, resUserData)
+	}
 
 	return res, nil
 }
