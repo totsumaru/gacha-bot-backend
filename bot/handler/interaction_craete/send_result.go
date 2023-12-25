@@ -91,7 +91,8 @@ func SendResult(
 		return 0, errors.NewError("ポイントを追加できません", err)
 	}
 	// カウントを追加
-	if err = appUserData.IncrementCount(tx, i.GuildID, i.Member.User.ID, 1); err != nil {
+	u := i.Member.User
+	if err = appUserData.IncrementCount(tx, i.GuildID, u.ID, u.Username, u.AvatarURL(""), 1); err != nil {
 		return 0, errors.NewError("カウントを追加できません", err)
 	}
 

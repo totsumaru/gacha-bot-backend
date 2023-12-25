@@ -35,7 +35,7 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) (int, error) {
 	}
 
 	currentPoint := 0
-	lim := count.Count{}
+	c := count.Count{}
 
 	ud, err := gw.FindByIDForUpdate(id)
 	if err != nil {
@@ -44,7 +44,7 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) (int, error) {
 		}
 	} else {
 		currentPoint = ud.Point().Int()
-		lim = ud.Count()
+		c = ud.Count()
 	}
 
 	newPoint := currentPoint + addPoint
@@ -54,7 +54,7 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) (int, error) {
 		return 0, errors.NewError("ポイントを作成できません", err)
 	}
 
-	newUserData, err := user_data.NewUserData(sID, uID, p, lim)
+	newUserData, err := user_data.NewUserData(sID, uID, p, c, ud.UserName(), ud.IconURL())
 	if err != nil {
 		return 0, errors.NewError("ユーザーデータを作成できません", err)
 	}
@@ -70,7 +70,11 @@ func AddPoint(tx *gorm.DB, serverID, userID string, addPoint int) (int, error) {
 //
 // Todayの場合は、numをcountValue分追加
 // 昨日以前の場合は、日付をTodayに変更し、numに1をセット
-func IncrementCount(tx *gorm.DB, serverID, userID string, countValue int) error {
+func IncrementCount(
+	tx *gorm.DB,
+	serverID, userID, userName, iconURL string,
+	countValue int,
+) error {
 	sID, err := domain.NewDiscordID(serverID)
 	if err != nil {
 		return errors.NewError("サーバーIDの生成に失敗しました", err)
@@ -132,7 +136,17 @@ func IncrementCount(tx *gorm.DB, serverID, userID string, countValue int) error 
 		}
 	}
 
-	newUserData, err := user_data.NewUserData(sID, uID, p, newCount)
+	un, err := user_data.NewUserName(userName)
+	if err != nil {
+		return errors.NewError("ユーザー名を作成できません", err)
+	}
+
+	iu, err := user_data.NewIconURL(iconURL)
+	if err != nil {
+		return errors.NewError("アイコンURLを作成できません", err)
+	}
+
+	newUserData, err := user_data.NewUserData(sID, uID, p, newCount, un, iu)
 	if err != nil {
 		return errors.NewError("ユーザーデータを作成できません", err)
 	}

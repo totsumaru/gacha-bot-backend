@@ -19,6 +19,8 @@ func ResetNum(s *discordgo.Session, m *discordgo.MessageCreate) error {
 		bot.DB,
 		m.GuildID,
 		m.Author.ID,
+		m.Author.Username,
+		m.Author.AvatarURL(""),
 		-ud.Count().Num().Int(),
 	); err != nil {
 		return errors.NewError("カウントを追加できません", err)

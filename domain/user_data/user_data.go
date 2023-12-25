@@ -15,6 +15,8 @@ type UserData struct {
 	userID   domain.DiscordID
 	point    domain.Point
 	count    count.Count
+	userName UserName
+	iconURL  IconURL
 }
 
 // ユーザーデータを作成します
@@ -23,6 +25,8 @@ func NewUserData(
 	userID domain.DiscordID,
 	point domain.Point,
 	count count.Count,
+	userName UserName,
+	iconURL IconURL,
 ) (UserData, error) {
 	id, err := NewID(serverID, userID)
 	if err != nil {
@@ -35,6 +39,8 @@ func NewUserData(
 		userID:   userID,
 		point:    point,
 		count:    count,
+		userName: userName,
+		iconURL:  iconURL,
 	}
 
 	if err = p.validate(); err != nil {
@@ -89,6 +95,16 @@ func (p UserData) Count() count.Count {
 	return p.count
 }
 
+// ユーザー名を返します
+func (p UserData) UserName() UserName {
+	return p.userName
+}
+
+// アイコンURLを返します
+func (p UserData) IconURL() IconURL {
+	return p.iconURL
+}
+
 // 検証します
 func (p UserData) validate() error {
 	return nil
@@ -102,12 +118,16 @@ func (p UserData) MarshalJSON() ([]byte, error) {
 		UserID   domain.DiscordID `json:"user_id"`
 		Point    domain.Point     `json:"point"`
 		Count    count.Count      `json:"count"`
+		UserName UserName         `json:"user_name"`
+		IconURL  IconURL          `json:"icon_url"`
 	}{
 		ID:       p.id,
 		ServerID: p.serverID,
 		UserID:   p.userID,
 		Point:    p.point,
 		Count:    p.count,
+		UserName: p.userName,
+		IconURL:  p.iconURL,
 	}
 
 	return json.Marshal(data)
@@ -121,6 +141,8 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 		UserID   domain.DiscordID `json:"user_id"`
 		Point    domain.Point     `json:"point"`
 		Count    count.Count      `json:"count"`
+		UserName UserName         `json:"user_name"`
+		IconURL  IconURL          `json:"icon_url"`
 	}{}
 
 	if err := json.Unmarshal(b, &data); err != nil {
@@ -132,6 +154,8 @@ func (p *UserData) UnmarshalJSON(b []byte) error {
 	p.userID = data.UserID
 	p.point = data.Point
 	p.count = data.Count
+	p.userName = data.UserName
+	p.iconURL = data.IconURL
 
 	return nil
 }
