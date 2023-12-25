@@ -3,6 +3,7 @@ package user_data
 import (
 	"encoding/json"
 	defaultError "errors"
+	"log"
 
 	"github.com/totsumaru/gacha-bot-backend/domain"
 	"github.com/totsumaru/gacha-bot-backend/domain/user_data"
@@ -146,6 +147,7 @@ func (g Gateway) Delete(id user_data.ID) error {
 // FindTop100ByServerID は、指定されたサーバーIDに一致するユーザーデータの中から、
 // ポイントの上位100個のレコードを取得します。
 func (g Gateway) FindTop100ByServerID(serverID domain.DiscordID) ([]user_data.UserData, error) {
+	log.Println("「ランキングの取得を開始: ", serverID.String())
 	var dbUserDatas []gateway.UserData
 	var userDatas []user_data.UserData
 
@@ -163,6 +165,7 @@ func (g Gateway) FindTop100ByServerID(serverID domain.DiscordID) ([]user_data.Us
 		}
 		userDatas = append(userDatas, userData)
 	}
+	log.Println("ランキングの取得を終了」: ", serverID.String())
 
 	return userDatas, nil
 }
