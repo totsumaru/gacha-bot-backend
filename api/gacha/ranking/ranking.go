@@ -3,11 +3,9 @@ package ranking
 import (
 	"net/http"
 
-	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
 	appUserData "github.com/totsumaru/gacha-bot-backend/application/user_data"
 	domainUserData "github.com/totsumaru/gacha-bot-backend/domain/user_data"
-	"github.com/totsumaru/gacha-bot-backend/lib/discord"
 	"github.com/totsumaru/gacha-bot-backend/lib/errors"
 	"gorm.io/gorm"
 )
@@ -34,7 +32,7 @@ func GetRanking(e *gin.Engine, db *gorm.DB) {
 				return errors.NewError("ガチャの取得に失敗しました", err)
 			}
 
-			res, err = ConvertToAPIGachaRes(discord.Session, userDatas)
+			res, err = ConvertToAPIGachaRes(userDatas)
 			if err != nil {
 				return errors.NewError("APIのレスポンスに変換できません", err)
 			}
@@ -51,19 +49,13 @@ func GetRanking(e *gin.Engine, db *gorm.DB) {
 }
 
 // ドメインのユーザーデータをAPIのレスポンスに変換します
-func ConvertToAPIGachaRes(s *discordgo.Session, datas []domainUserData.UserData) ([]ResUserData, error) {
+func ConvertToAPIGachaRes(datas []domainUserData.UserData) ([]ResUserData, error) {
 	res := make([]ResUserData, 0)
 
 	for i, userData := range datas {
-		userID := userData.UserID().String()
-		u, err := s.User(userID)
-		if err != nil {
-			return nil, errors.NewError("ユーザー名を取得できません", err)
-		}
-
 		resUserData := ResUserData{
-			UserName:  u.Username,
-			AvatarURL: u.AvatarURL(""),
+			UserName:  userData.UserName().String(),
+			AvatarURL: userData.IconURL().String(),
 			Point:     userData.Point().Int(),
 			Rank:      i + 1,
 		}
