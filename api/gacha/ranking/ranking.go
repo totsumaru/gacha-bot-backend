@@ -1,7 +1,9 @@
 package ranking
 
 import (
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/gin-gonic/gin"
@@ -27,17 +29,23 @@ func GetRanking(e *gin.Engine, db *gorm.DB) {
 	e.GET("/api/gacha/ranking", func(c *gin.Context) {
 		serverID := c.Query("server_id")
 
+		log.Println("APIを受け付けました: ", serverID, ", ", time.Now())
+
 		res := make([]ResUserData, 0)
 		err := db.Transaction(func(tx *gorm.DB) error {
+			log.Println("ランキング取得前: ", serverID, ", ", time.Now())
 			userDatas, err := appUserData.FindTop100ByServerID(tx, serverID)
 			if err != nil {
 				return errors.NewError("ガチャの取得に失敗しました", err)
 			}
+			log.Println("ランキング取得後: ", serverID, ", ", time.Now())
 
 			res, err = ConvertToAPIGachaRes(discord.Session, userDatas)
 			if err != nil {
 				return errors.NewError("APIのレスポンスに変換できません", err)
 			}
+
+			log.Println("レスポンス作成後: ", serverID, ", ", time.Now())
 
 			return nil
 		})
