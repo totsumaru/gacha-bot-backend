@@ -46,6 +46,7 @@ func SendOpen(
 		Label:    domainGacha.Open().Button()[0].Label().String(),
 		Style:    ButtonStyleToDiscordStyle[domainGacha.Open().Button()[0].Style().String()],
 		CustomID: domainGacha.Open().Button()[0].Kind().String(),
+		Emoji:    discordgo.ComponentEmoji{Name: "▶️"},
 	}
 
 	actions := discordgo.ActionsRow{

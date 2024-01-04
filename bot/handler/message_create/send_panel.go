@@ -12,12 +12,14 @@ func SendPanel(s *discordgo.Session, m *discordgo.MessageCreate, gachaDomain gac
 		Label:    "ガチャを回す！",
 		Style:    discordgo.PrimaryButton,
 		CustomID: gachaDomain.Panel().Button()[0].Kind().String(),
+		Emoji:    discordgo.ComponentEmoji{Name: "▶️"},
 	}
 
 	btn2 := discordgo.Button{
 		Label:    "ポイント確認",
 		Style:    discordgo.SecondaryButton,
 		CustomID: "check_point",
+		Emoji:    discordgo.ComponentEmoji{Name: "▶️"},
 	}
 
 	actions := discordgo.ActionsRow{

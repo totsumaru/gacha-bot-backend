@@ -71,6 +71,7 @@ func SendResult(
 				Label: btn.Label().String(),
 				Style: discordgo.LinkButton,
 				URL:   btn.URL().String(),
+				Emoji: discordgo.ComponentEmoji{Name: "▶️"},
 			})
 		}
 	}
