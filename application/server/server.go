@@ -103,33 +103,33 @@ func StartSubscription(
 // webhookのAPIからコールされます。
 // サブスクリプションの期限が終了したことを意味します。
 func DeleteSubscription(tx *gorm.DB, id string) error {
-	// idでサーバーを取得
-	serverID, err := domain.NewDiscordID(id)
-	if err != nil {
-		return errors.NewError("IDを作成できません", err)
-	}
+	// // idでサーバーを取得
+	// serverID, err := domain.NewDiscordID(id)
+	// if err != nil {
+	// 	return errors.NewError("IDを作成できません", err)
+	// }
 
-	gw, err := gatewayServer.NewGateway(tx)
-	if err != nil {
-		return errors.NewError("ゲートウェイの生成に失敗しました", err)
-	}
+	// gw, err := gatewayServer.NewGateway(tx)
+	// if err != nil {
+	// 	return errors.NewError("ゲートウェイの生成に失敗しました", err)
+	// }
 
-	s, err := gw.FindByID(serverID)
-	if err != nil {
-		return errors.NewError("IDでサーバーを取得できません", err)
-	}
+	// s, err := gw.FindByID(serverID)
+	// if err != nil {
+	// 	return errors.NewError("IDでサーバーを取得できません", err)
+	// }
 
-	emptySubscriberID := domain.DiscordID{}
-	emptyStripe := stripe.Stripe{}
+	// emptySubscriberID := domain.DiscordID{}
+	// emptyStripe := stripe.Stripe{}
 
-	sv, err := server.NewServer(s.ID(), emptySubscriberID, emptyStripe)
-	if err != nil {
-		return errors.NewError("サーバーの生成に失敗しました", err)
-	}
+	// sv, err := server.NewServer(s.ID(), emptySubscriberID, emptyStripe)
+	// if err != nil {
+	// 	return errors.NewError("サーバーの生成に失敗しました", err)
+	// }
 
-	if err = gw.Update(sv); err != nil {
-		return errors.NewError("更新できません", err)
-	}
+	// if err = gw.Update(sv); err != nil {
+	// 	return errors.NewError("更新できません", err)
+	// }
 
 	return nil
 }
