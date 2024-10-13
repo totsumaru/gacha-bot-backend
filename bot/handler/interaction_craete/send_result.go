@@ -56,6 +56,9 @@ func SendResult(
 			URL: r.Embed().ImageURL().String(),
 		},
 		Color: r.Embed().Color().Int(),
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: "※本サービスは2024年12月31日をもって終了します。長らくご愛顧いただきありがとうございます。",
+		},
 	}
 
 	webhook := &discordgo.WebhookEdit{
